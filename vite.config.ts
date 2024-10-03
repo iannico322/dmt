@@ -4,7 +4,7 @@ import { defineConfig } from "vite"
 
 export default defineConfig({
         // REPO-NAME
-  base: "/DTR",
+  base: "/",
   plugins: [react()],
   resolve: {
     alias: {
