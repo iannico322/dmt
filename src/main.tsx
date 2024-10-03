@@ -12,30 +12,30 @@ const Page1= lazy(() =>
   wait(1300).then(() => import("./screens/page1.tsx"))
 );
 
-const Page2= lazy(() =>
-  wait(300).then(() => import("./screens/page2.tsx"))
+const Central= lazy(() =>
+  wait(300).then(() => import("./screens/centralOffice/centralDashboard.tsx"))
 );
 
 const router = createBrowserRouter([
   {
-    path: "/DTR/",
+    path: "/",
     element: <App />,
     
     children: [
       {
-        path: "/DTR/", 
-        element: <Navigate to="/DTR/home" />, 
+        path: "/", 
+        element: <Navigate to="/home" />, 
       },
       {
-        path: "/DTR/home",
+        path: "/dashboard",
         element: <>
         <Suspense fallback={<Loader />}>
-          <Page2 />
+          <Central/>
         </Suspense>
       </>,
       },
       {
-        path: "/DTR/page2",
+        path: "/page2",
         element: <>
         <Suspense fallback={<Loader />}>
           <Page1 />

@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSpring, animated } from "react-spring";
 import { useGesture } from "react-use-gesture";
-import phRegions from './phRegions.json'; 
+import phRegions from '../phRegions.json'; 
 
-import regionsData from './sampleData.json'; 
+import regionsData from '../sampleData.json'; 
 
 const MapComponent: React.FC = () => {
   const [scale, setScale] = useState(1); // Zoom level
