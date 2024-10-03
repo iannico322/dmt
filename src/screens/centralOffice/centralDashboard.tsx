@@ -4,6 +4,8 @@ import { useGesture } from "react-use-gesture";
 import phRegions from '../phRegions.json'; 
 
 import regionsData from '../sampleData.json'; 
+import PieChart01 from "./pieChart";
+import Linechart from "./lineChart";
 
 const MapComponent: React.FC = () => {
   const [scale, setScale] = useState(1); // Zoom level
@@ -86,15 +88,37 @@ const [regionCenters, setRegionCenters] = useState<{ [key: string]: { x: number,
   }, [mapRef]);
 
 
+  const calculateTotals = (data:any) => {
+    // Initialize totals
+    const totals = {
+      operational: 0,
+      development: 0,
+      trainingOrOthers: 0,
+      withdraw: 0,
+    };
+  
+    // Loop through each item in the data array
+    data.forEach((item:any) => {
+      totals.operational += item.operational;
+      totals.development += item.development;
+      totals.trainingOrOthers += item.trainingOrOthers;
+      totals.withdraw += item.withdraw;
+    });
+  
+    return totals;
+  };
+
+
 
   return (
     <>
-    <div className=" pointer-events-none absolute w-screen h-scren flex justify-end items-start z-10 ">
-
     
+    <div className=" relative flex w-screen h-screen items-center justify-between  ">
 
-    </div>
-    <div className=" relative flex w-screen h-screen items-center justify-end ">
+    <div>
+      <Linechart newData={calculateTotals(regionsData)}/>
+   
+      </div>
     
       <div {...bind()} className=" relative flex mr-20 md:m-2  md:w-full w-[40%] h-[80vh] border  bg-slate-500/5 overflow-hidden  items-start justify-end  rounded-md ">
       <div className=" absolute overflow-hidden pointer-events-none  flex items-end justify-end md:mr-2 mr-5 w-[300px] min-h-[90px]  mt-10 rounded-lg z-30 flex-col gap-4  ">
@@ -135,6 +159,11 @@ const [regionCenters, setRegionCenters] = useState<{ [key: string]: { x: number,
         </div>
         </> : ""}
       </div>
+      <div className=" absolute self-end z-30">
+      {result?
+        <PieChart01 data={result}/>:""}
+      </div>
+      
       <animated.svg
         width="100%"
         height="100%"
@@ -197,7 +226,7 @@ const [regionCenters, setRegionCenters] = useState<{ [key: string]: { x: number,
   
         
       </animated.svg>
-    </div>
+      </div>
     </div>
     
     </>

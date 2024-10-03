@@ -16,10 +16,13 @@ function App() {
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
      <div className=" bg-background min-h-screen w-full overflow-hidden flex flex-col  items-center">
       
-      <nav className=" pointer-events-none animate__animated animate__slideInDown  z-20 bg-background/0 fixed flex justify-between items-center w-full max-w-[1468px] py-5 border-b-[0px] border-accent \ ">
+      <nav className="  animate__animated animate__slideInDown  z-20 bg-background/0 fixed flex justify-between items-center w-full max-w-[1168px] py-5 border-b-[0px] border-accent   mx-9 sm:mx-4">
         <Link className=" ml-5" to="/react-vite-supreme" >
-          <img src={viteLogo} className="logo h-10 object-contain sm:h-7 " alt="DICT logo" />
+          <img src={viteLogo} className="logo h-10 object-contain  " alt="DICT logo" />
         </Link>
+        <div className=" w-3 h-3">
+
+        </div>
       </nav>
  
 
