@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 
 const PieChart01 = (props: any) => {
+   
   // Initialize chartData with default values
   const [chartData, setChartData] = useState<any>({
     series: [0, 0, 0, 0],
@@ -9,6 +10,19 @@ const PieChart01 = (props: any) => {
       chart: {
         width: 230,
         type: "pie",
+        animations: {
+            enabled: true,
+            easing: 'easeinout',
+            speed: 800,
+            animateGradually: {
+                enabled: true,
+                delay: 150
+            },
+            dynamicAnimation: {
+                enabled: true,
+                speed: 350
+            }
+        }
       },
       labels: [
         "Operational",
@@ -49,7 +63,7 @@ const PieChart01 = (props: any) => {
 
   return (
     <div>
-      <div id="chart">
+      <div id="chart" className=" animate__animated animate__slideInUp ">
         <ReactApexChart
           options={chartData.options}
           series={chartData.series}

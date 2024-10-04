@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSpring, animated } from "react-spring";
 import { useGesture } from "react-use-gesture";
+
 import phRegions from '../phRegions.json'; 
 
 import regionsData from '../sampleData.json'; 
@@ -47,24 +48,21 @@ const MapComponent: React.FC = () => {
 
   // Gesture binding for zooming and panning
   const bind = useGesture({
-    onDrag: ({ movement: [mx, my], memo = [position.x, position.y] }) => {
-      // Update the position when dragging
-      setPosition({ x: memo[0] + mx, y: memo[1] + my });
-      return memo;
-    },
-    onWheel: ({ delta: [, dy] }) => {
-      // Zoom on mouse wheel
-      setScale((prev) => Math.max(0.5, prev + dy * -0.001));
-    }
+    onDrag: ({ offset: [x, y] }) => setPosition({ x, y }),
+    onPinch: ({ offset: [d] }) => setScale(Math.max(0.5, d / 100)),
+    onWheel: ({ delta: [, dy] }) => setScale(prev => Math.max(0.5, prev - dy * 0.001))
   });
 
   const springProps = useSpring({
-    transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-    config: { tension: 300, friction: 30 }
+    transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`
   });
 
+ 
 
-
+  useEffect(()=>{
+    setSelectedRegion(`Philippines eLGU IBPLS Status`)
+    setResult(calculateTotals(regionsData))
+  },[])
 
 const [regionCenters, setRegionCenters] = useState<{ [key: string]: { x: number, y: number } }>({});
 
@@ -91,6 +89,7 @@ const [regionCenters, setRegionCenters] = useState<{ [key: string]: { x: number,
   const calculateTotals = (data:any) => {
     // Initialize totals
     const totals = {
+      id: "PH",
       operational: 0,
       development: 0,
       trainingOrOthers: 0,
@@ -113,14 +112,14 @@ const [regionCenters, setRegionCenters] = useState<{ [key: string]: { x: number,
   return (
     <>
     
-    <div className=" relative flex w-screen h-screen items-center justify-between  ">
+    <div className=" relative flex  w-screen h-screen items-center justify-center  ">
 
-    <div>
+    <div className=" hidden">
       <Linechart newData={calculateTotals(regionsData)}/>
    
       </div>
     
-      <div {...bind()} className=" relative flex mr-20 md:m-2  md:w-full w-[40%] h-[80vh] border  bg-slate-500/5 overflow-hidden  items-start justify-end  rounded-md ">
+      <div {...bind()} className=" relative flex mr-20 md:m-2  md:w-full w-[40%] h-[80vh] border   overflow-hidden  items-start justify-end  rounded-md ">
       <div className=" absolute overflow-hidden pointer-events-none  flex items-end justify-end md:mr-2 mr-5 w-[300px] min-h-[90px]  mt-10 rounded-lg z-30 flex-col gap-4  ">
         <h1 className=" font-semibold font-gextrabold text-2xl text-end">{selectedRegion}</h1>
 
@@ -168,7 +167,7 @@ const [regionCenters, setRegionCenters] = useState<{ [key: string]: { x: number,
         width="100%"
         height="100%"
         viewBox="200 0 602.39 1109.44"
-        style={{ ...springProps, cursor: "grab" }}
+        style={{ ...springProps, cursor: "grab", touchAction: "none" }}
         xmlns="http://www.w3.org/2000/svg"
         ref={mapRef}
       >

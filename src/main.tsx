@@ -18,16 +18,16 @@ const Central= lazy(() =>
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/dmt/",
     element: <App />,
     
     children: [
       {
-        path: "/", 
-        element: <Navigate to="/dashboard" />, 
+        path: "/dmt/", 
+        element: <Navigate to="/dmt/dashboard" />, 
       },
       {
-        path: "/dashboard",
+        path: "/dmt/dashboard",
         element: <>
         <Suspense fallback={<Loader />}>
           <Central/>
@@ -35,7 +35,7 @@ const router = createBrowserRouter([
       </>,
       },
       {
-        path: "/page2",
+        path: "/dmt/page2",
         element: <>
         <Suspense fallback={<Loader />}>
           <Page1 />

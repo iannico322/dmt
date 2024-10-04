@@ -1,7 +1,7 @@
 import { ThemeProvider } from "@/components/theme-provider"
 
 import viteLogo from "/DICT.png";
-import { ModeToggle } from "./components/mode-toggle";
+// import { ModeToggle } from "./components/mode-toggle";
 
 import { Link, Outlet } from "react-router-dom";
 
@@ -17,8 +17,9 @@ function App() {
      <div className=" bg-background min-h-screen w-full overflow-hidden flex flex-col  items-center">
       
       <nav className="  animate__animated animate__slideInDown  z-20 bg-background/0 fixed flex justify-between items-center w-full max-w-[1168px] py-5 border-b-[0px] border-accent   mx-9 sm:mx-4">
-        <Link className=" ml-5" to="/react-vite-supreme" >
+        <Link className=" ml-5 flex  gap-2" to="/dmt/" >
           <img src={viteLogo} className="logo h-10 object-contain  " alt="DICT logo" />
+          <p className=" text-red-600 text-xs font-gbold">Sample only</p>
         </Link>
         <div className=" w-3 h-3">
 

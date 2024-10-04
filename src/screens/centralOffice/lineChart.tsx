@@ -15,15 +15,21 @@ const LineChart = ({ newData }:any) => {
     ],
     options: {
       chart: {
-        
         height: 350,
         type: "bar",
-        events: {
-          click: function (chart: any, w: any, e: any) {
-            // You can handle the click event here
-            console.log(chart, w, e);
-          },
-        },
+        animations: {
+            enabled: true,
+            easing: 'easeinout',
+            speed: 800,
+            animateGradually: {
+                enabled: true,
+                delay: 150
+            },
+            dynamicAnimation: {
+                enabled: true,
+                speed: 350
+            }
+        }
       },
       colors: colors,
       plotOptions: {
@@ -33,20 +39,22 @@ const LineChart = ({ newData }:any) => {
         },
       },
       dataLabels: {
-        enabled: false,
+        enabled: true, // Enable data labels
+        style: {
+          fontSize: '14px',
+          fontWeight: 'bold',
+        },
       },
       legend: {
         show: false,
       },
       xaxis: {
         categories: [
-          [
-        "Operational"],
-        ["Developmental"],
-        ["For Training/Others"],
-        ["Withdraw"]
-      ],
-        
+          ["Operational"],
+          ["Developmental"],
+          ["For Training/Others"],
+          ["Withdraw"],
+        ],
         labels: {
           style: {
             colors: colors,
@@ -75,7 +83,7 @@ const LineChart = ({ newData }:any) => {
 
   return (
     <div>
-      <div className=" flex flex-col gap-8">
+      <div className=" flex flex-col gap-8 sm:mt-[10vh] sm:w-[80vw] w-[50vw]">
         <h1 className=" text-2xl font-gsemibold">Current eLGU IBPLS in Philippines</h1>
         <ReactApexChart
           options={chartData.options}
