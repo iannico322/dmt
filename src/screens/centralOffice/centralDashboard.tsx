@@ -119,8 +119,8 @@ const [regionCenters, setRegionCenters] = useState<{ [key: string]: { x: number,
    
       </div>
     
-      <div {...bind()} className=" relative flex mr-20 md:m-2  md:w-full w-[40%] h-[80vh] border   overflow-hidden  items-start justify-end  rounded-md ">
-      <div className=" absolute overflow-hidden pointer-events-none  flex items-end justify-end md:mr-2 mr-5 w-[300px] min-h-[90px]  mt-10 rounded-lg z-30 flex-col gap-4  ">
+      <div {...bind()} className=" relative flex  md:m-2  md:w-full w-[100%] sm:h-[80vh] h-[100vh] border   overflow-hidden  items-start justify-end  rounded-md ">
+      <div className=" absolute overflow-hidden pointer-events-none  flex items-end justify-end md:mr-2 mr-5 w-screen min-h-[90px]  mt-10 rounded-lg z-30 flex-col gap-4  ">
         <h1 className=" font-semibold font-gextrabold text-2xl text-end">{selectedRegion}</h1>
 
         
