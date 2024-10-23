@@ -1,234 +1,150 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useSpring, animated } from "react-spring";
+import React, { useEffect, useState } from "react";
+import regionsData from "../sampleData.json";
+import PieChart01 from "./charts/pieChart";
+import Linechart from "./charts/lineChart";
+import Summary from "./charts/summary";
+import PhMap from "./map/phMap";
 import { useGesture } from "react-use-gesture";
-
-import phRegions from '../phRegions.json'; 
-
-import regionsData from '../sampleData.json'; 
-import PieChart01 from "./pieChart";
-import Linechart from "./lineChart";
+import { useSpring } from "react-spring";
+import axios from "./../../plugin/axios";
 
 const MapComponent: React.FC = () => {
+  const [result, setResult] = useState<any>({
+    id: "PH",
+    operational: 0,
+    development: 0,
+    trainingOrOthers: 0,
+    withdraw: 0,
+  });
+  const [data, setData] = useState<any[]>([]);
+
+  const months = [
+    "All Months", "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  const [clickedRegion, setClickedRegion] = useState<string | null>(null); 
+  const [selectedMonth, setSelectedMonth] = useState<string>('All Months');
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [scale, setScale] = useState(1); // Zoom level
   const [position, setPosition] = useState({ x: 0, y: 0 }); // For dragging/panning
-  const [hoveredRegion, setHoveredRegion] = useState<string | null>(null);
 
-  const [result,setResult] = useState<any>()
-
-  const [selectedRegion,setSelectedRegion] = useState<string | null>(null);
-
-  const operationalSpring = useSpring({
-    from: { number: 0 },
-    number: result ? result.operational : 0,
-    delay: 100,
-    config: { mass: 1, tension: 180, friction: 12 },
-  });
-
-  const developmentSpring = useSpring({
-    from: { number: 0 },
-    number: result ? result.development : 0,
-    delay: 140,
-    config: { mass: 1, tension: 180, friction: 12 },
-  });
-
-  const trainingSpring = useSpring({
-    from: { number: 0 },
-    number: result ? result.trainingOrOthers : 0,
-    delay: 160,
-    config: { mass: 1, tension: 180, friction: 12 },
-  });
-
-  const withdrawSpring = useSpring({
-    from: { number: 0 },
-    number: result ? result.withdraw : 0,
-    delay: 180,
-    config: { mass: 1, tension: 180, friction: 12 },
-  });
-
-
-  // Gesture binding for zooming and panning
   const bind = useGesture({
     onDrag: ({ offset: [x, y] }) => setPosition({ x, y }),
     onPinch: ({ offset: [d] }) => setScale(Math.max(0.5, d / 100)),
-    onWheel: ({ delta: [, dy] }) => setScale(prev => Math.max(0.5, prev - dy * 0.001))
+    onWheel: ({ delta: [, dy] }) => setScale((prev) => Math.max(0.5, prev - dy * 0.001)),
   });
+
+  const GetAllBP = () => {
+
+    // setInterval(()=>{
+
+    // },1000)
+    
+    axios.get('').then((e) => {
+      setData(e.data);
+      setResult(calculateTotals(e.data, 'All Months')); // Initial load with all months
+    });
+  };
 
   const springProps = useSpring({
-    transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`
+    transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
   });
 
- 
-
-  useEffect(()=>{
-    setSelectedRegion(`Philippines eLGU IBPLS Status`)
-    setResult(calculateTotals(regionsData))
-  },[])
-
-const [regionCenters, setRegionCenters] = useState<{ [key: string]: { x: number, y: number } }>({});
-
-  const mapRef:any = useRef(null);
   useEffect(() => {
-    // Get all path elements and calculate their centers
-    if (mapRef.current) {
-      const paths = mapRef.current.querySelectorAll('path');
-      const newCenters:any = {};
+    GetAllBP();
+    setSelectedRegion(`Philippines eLGU IBPLS Status`);
+  }, []);
 
-      paths.forEach((path: any) => {
-        const bbox = path.getBBox();
-        newCenters[path.id] = {
-          x: bbox.x + bbox.width / 2,
-          y: bbox.y + bbox.height / 2
-        };
-      });
-
-      setRegionCenters(newCenters);
-    }
-  }, [mapRef]);
-
-
-  const calculateTotals = (data:any) => {
-    // Initialize totals
-    const totals = {
+  const calculateTotals = (e: any, selectedMonth: string) => {
+    let totals = {
       id: "PH",
       operational: 0,
       development: 0,
       trainingOrOthers: 0,
       withdraw: 0,
     };
-  
-    // Loop through each item in the data array
-    data.forEach((item:any) => {
-      totals.operational += item.operational;
-      totals.development += item.development;
-      totals.trainingOrOthers += item.trainingOrOthers;
-      totals.withdraw += item.withdraw;
+
+    e.filter((item: any) => {
+      if (selectedMonth === "All Months") return true;
+      const itemMonth = new Date(item.date).getMonth() + 1; // Extract month from date
+      return months[itemMonth] === selectedMonth;
+    }).map((item: any) => {
+      totals.operational += parseInt(item.operational);
+      totals.development += parseInt(item.development);
+      totals.trainingOrOthers += parseInt(item.trainingOrOthers);
+      totals.withdraw += parseInt(item.withdraw);
     });
-  
+
     return totals;
   };
 
-
+  const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selected:any = event.target.value;
+    if (selected == 'All Months') {
+      GetAllBP()
+    }
+    setSelectedMonth(selected);
+    setResult(calculateTotals(data, selected));
+  };
 
   return (
-    <>
-    
-    <div className=" relative flex  w-screen h-screen items-center justify-center  ">
-
-    <div className=" hidden">
-      <Linechart newData={calculateTotals(regionsData)}/>
-   
+    <div className="relative flex w-screen h-screen items-center justify-center">
+      <div className="">
+        {/* <Linechart newData={calculateTotals(regionsData)} /> */}
       </div>
-    
-      <div {...bind()} className=" relative flex  md:m-2  md:w-full w-[100%] sm:h-[80vh] h-[100vh] border   overflow-hidden  items-start justify-end  rounded-md ">
-      <div className=" absolute overflow-hidden pointer-events-none  flex items-end justify-end md:mr-2 mr-5 w-screen min-h-[90px]  mt-10 rounded-lg z-30 flex-col gap-4  ">
-        <h1 className=" font-semibold font-gextrabold text-2xl text-end">{selectedRegion}</h1>
 
+      <div
+        {...bind()}
+        className="relative flex md:m-2 md:w-full w-[100%] sm:h-[80vh] h-[100vh] border overflow-hidden items-start justify-end rounded-md"
         
-       {result?
-       <>
-       <div className=" flex flex-col justify-end items-end ">
-          <h1 className=" font-gextrabold text-green-400 text-4xl drop-shadow-sm">
-            <animated.span>
-              {operationalSpring.number.to((n) => n.toFixed(0))}
-            </animated.span></h1>
-          <p className="  text-[7px] font-gsemibold " >OPERATIONAL</p>
-        </div>
-
-        <div className=" flex flex-col justify-end items-end ">
-          <h1 className=" font-gextrabold text-yellow-400 text-4xl">
-            <animated.span>
-              {developmentSpring.number.to((n) => n.toFixed(0))}
-            </animated.span></h1>
-          <p className="  text-[7px] font-gsemibold " >DEVELOPMENTAL</p>
-        </div>
-
-        <div className=" flex flex-col justify-end items-end ">
-          <h1 className=" font-gextrabold text-orange-600 text-4xl">
-            <animated.span>
-              {trainingSpring.number.to((n) => n.toFixed(0))}
-            </animated.span></h1>
-          <p className="  text-[7px] font-gsemibold " >FOR TRAINING/OTHERS</p>
-        </div>
-
-        <div className=" flex flex-col justify-end items-end ">
-          <h1 className=" font-gextrabold text-red-600 text-4xl"><animated.span>
-              {withdrawSpring.number.to((n) => n.toFixed(0))}
-            </animated.span></h1>
-          <p className="  text-[7px] font-gsemibold " >WITHDRAW</p>
-        </div>
-        </> : ""}
-      </div>
-      <div className=" absolute self-end z-30">
-      {result?
-        <PieChart01 data={result}/>:""}
-      </div>
       
-      <animated.svg
-        width="100%"
-        height="100%"
-        viewBox="200 0 602.39 1109.44"
-        style={{ ...springProps, cursor: "grab", touchAction: "none" }}
-        xmlns="http://www.w3.org/2000/svg"
-        ref={mapRef}
       >
-      
-        
-
-   {phRegions.map((e:any)=>(
-<g key={e.id}>
-    <path id={e.id} d={e.d} fill={hoveredRegion === e.id ? "#fddc03" : "#6f93ef"}
-   onMouseEnter={() => setHoveredRegion(e.id)}
-   
-   onMouseLeave={() => setHoveredRegion(null)}
-   onClick={ async() => {setSelectedRegion(`${e.name} \n (${e.id})`)
-
-    let out:any =  regionsData.filter((x:any)=>x.id == e.id)
-
-    console.log(out[0])
-
-    setResult(out?out[0]:"")
-
-
-    
-  
-  
-  
-  }}
-   >
-    <title>{e.id}</title>
-   </path>
-
-   {regionCenters[e.id] && (
-    <>
-            <text
-              x={regionCenters[e.id].x} // X-coordinate based on center
-              y={regionCenters[e.id].y} // Y-coordinate based on center
-              fontSize="8"
-              fill="#212529"
-              textAnchor="middle"
-              pointerEvents="none"
-              style={{zIndex:9999}}
-              dominantBaseline="middle"
-
-             
+        <div className="absolute overflow-hidden pointer-events-none flex items-end justify-end md:mr-2 mr-5 w-screen min-h-[90px] mt-10 rounded-lg z-30 flex-col gap-4">
+          <h1 className="font-semibold pointer-events-auto font-gextrabold text-2xl text-end" onClick={()=>{
+          setClickedRegion(null)
+          GetAllBP();
+          setSelectedRegion(`Philippines eLGU IBPLS Status`);
+          setSelectedMonth('All Months')
+        }}>
+            {selectedRegion}
+          </h1>
+          <div className="flex flex-col space-y-2">
+            <label htmlFor="monthDropdown" className="text-lg font-semibold">
+              Select a Month in 2024:
+            </label>
+            <select
+              id="monthDropdown"
+              className="pointer-events-auto w-64 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={selectedMonth}
+              onChange={handleMonthChange}
             >
-              {e.name}
-            </text>
-            
-          </>
-          )}
-   
-   </g>
-   ))}
+              {months.map((month, index) => (
+                <option key={index} value={month}>
+                  {`${month} 2024`}
+                </option>
+              ))}
+            </select>
+          </div>
 
-   
-  
-        
-      </animated.svg>
+          {result ? <Summary result={result} /> : ""}
+        </div>
+        <div className="absolute self-end z-30">
+          {result ? <PieChart01 data={result} /> : ""}
+        </div>
+        <PhMap
+          springProps={springProps}
+          data={data}
+          setData={setData}
+          calculateTotals={calculateTotals}
+          selectedMonth={selectedMonth}
+          setSelectedRegion={setSelectedRegion}
+          selectedRegion={selectedRegion}
+          setResult={setResult}
+          clickedRegion={clickedRegion}
+          setClickedRegion={setClickedRegion}
+        />
       </div>
     </div>
-    
-    </>
   );
 };
 
