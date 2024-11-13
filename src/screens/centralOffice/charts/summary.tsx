@@ -31,8 +31,8 @@ function Summary({result}:any) {
         config: { mass: 1, tension: 180, friction: 12 },
       });
   return (
-    <>
-       <div className=" flex flex-col justify-end items-end ">
+    <div className=" md:mr-2 mr-5">
+       <div className=" flex flex-col justify-end items-end  ">
           <h1 className=" font-gextrabold text-green-400 text-4xl drop-shadow-sm">
             <animated.span>
               {operationalSpring.number.to((n) => n.toFixed(0))}
@@ -52,7 +52,8 @@ function Summary({result}:any) {
           <h1 className=" font-gextrabold text-orange-600 text-4xl">
             <animated.span>
               {trainingSpring.number.to((n) => n.toFixed(0))}
-            </animated.span></h1>
+            </animated.span>
+            </h1>
           <p className="  text-[7px] font-gsemibold " >FOR TRAINING/OTHERS</p>
         </div>
 
@@ -64,7 +65,7 @@ function Summary({result}:any) {
         </div>
      
        
- </>
+ </div>
   )
 }
 

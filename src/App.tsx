@@ -16,10 +16,10 @@ function App() {
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
      <div className=" bg-background min-h-screen w-full overflow-hidden flex flex-col  items-center">
       
-      <nav className="  animate__animated animate__slideInDown  z-20 bg-background/0 fixed flex justify-between items-center w-full max-w-[1168px] py-5 border-b-[0px] border-accent   mx-9 sm:mx-4">
+      <nav className=" mt-4  animate__animated animate__slideInDown  z-20 bg-background/0 fixed flex items-center w-full  py-5 border-b-[0px] border-accent   mx-9 sm:mx-4">
         <Link className=" ml-5 flex  gap-2" to="/dmt/" >
           <img src={viteLogo} className="logo h-10 object-contain  " alt="DICT logo" />
-          <p className=" text-red-600 text-xs font-gbold">Sample only</p>
+         
         </Link>
         <div className=" w-3 h-3">
 

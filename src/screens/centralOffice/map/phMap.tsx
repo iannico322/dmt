@@ -1,11 +1,10 @@
 import { animated } from "react-spring";
-import regionsData from "./../../sampleData.json";
 import phRegions from "./phRegions.json";
 import { useState } from "react";
 
 
 
-function PhMap({selectedMonth,data, setData,setResult, setSelectedRegion, springProps,clickedRegion,setClickedRegion}: any) {
+function PhMap({selectedMonth,data, setResult, setSelectedRegion, springProps,clickedRegion,setClickedRegion}: any) {
   const [hoveredRegion, setHoveredRegion] = useState<string | null>(null);
 // New state for clicked region
   const months = [
@@ -51,10 +50,10 @@ function PhMap({selectedMonth,data, setData,setResult, setSelectedRegion, spring
             d={e.d}
             fill={
               clickedRegion === e.id
-                ? "#fddc03" // Color when the region is clicked
+                ? "#1c1d6e" // Color when the region is clicked
                 : hoveredRegion === e.id
-                ? "#fddc03" // Color when the region is hovered
-                : "#6f93ef" // Default color
+                ? "#1c1d6e" // Color when the region is hovered
+                : "#3e4a5a" // Default color
             }
             onMouseEnter={() => setHoveredRegion(e.id)}
             onMouseLeave={() => setHoveredRegion(null)}
@@ -69,18 +68,18 @@ function PhMap({selectedMonth,data, setData,setResult, setSelectedRegion, spring
             }}
             className="cursor-pointer"
           >
-            <title>{e.id}</title>
+            <title >{e.id}</title>
           </path>
           <text
             x={e.x} // X-coordinate based on center
             y={e.y} // Y-coordinate based on center
             fontSize="8"
-            fill="#212529"
+            fill="#e7be16"
             textAnchor="middle"
             pointerEvents="none"
             dominantBaseline="middle"
           >
-            {e.name}
+            {e.id}
           </text>
         </g>
       ))}

@@ -72,19 +72,21 @@
 
 
 /* width */
-::-webkit-scrollbar {
-  width: 7px;
-  }
-  
-  /* Track */
-  ::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  }
-  
-  /* Handle */
-  ::-webkit-scrollbar-thumb {
-  background: #424242;
-  }
+/* Custom scrollbar for Chrome, Edge, Safari */
+.scroll-me-1::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scroll-me-1::-webkit-scrollbar-thumb {
+  background-color: #94a3b8;
+  border-radius: 5px;
+}
+
+.scroll-me-1::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
 
 :root {
   font-family: 'Gilroy Regular';
