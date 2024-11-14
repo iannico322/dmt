@@ -36,7 +36,7 @@ const INITIAL_RESULT = {
 
 // Memoized child components
 const MemoizedRegionRanking:any = memo(RegionRanking);
-const MemoizedRadarChart = memo(RadarChart);
+const MemoizedRadarChart:any = memo(RadarChart);
 const MemoizedLineChart:any = memo(LineChart);
 const MemoizedSummary = memo(Summary);
 
@@ -126,49 +126,7 @@ const getTopRegions = useCallback((data:any) => {
 }, []);
 
 
-const calculateMonthlyTotals = useCallback((data: any[]) => {
-  // Initialize an array to hold totals for each month
-  const monthlyTotals = {
-    operational: Array(12).fill(0),
-    development: Array(12).fill(0),
-    trainingOrOthers: Array(12).fill(0),
-    withdraw: Array(12).fill(0),
-  };
 
-  // Iterate through the data to accumulate totals by month
-  data.forEach(item => {
-    const itemDate = new Date(item.date);
-    const monthIndex = itemDate.getMonth(); // Get month index (0-11)
-
-    // Accumulate totals for each category
-    monthlyTotals.operational[monthIndex] += parseInt(item.operational) || 0;
-    monthlyTotals.development[monthIndex] += parseInt(item.development) || 0;
-    monthlyTotals.trainingOrOthers[monthIndex] += parseInt(item.trainingOrOthers) || 0;
-    monthlyTotals.withdraw[monthIndex] += parseInt(item.withdraw) || 0;
-  });
-
-  // Transform the monthly totals into the desired format
-
-
-  return [
-    {
-      name: 'Operational',
-      data: monthlyTotals.operational,
-    },
-    {
-      name: 'Developmental',
-      data: monthlyTotals.development,
-    },
-    {
-      name: 'Training',
-      data: monthlyTotals.trainingOrOthers,
-    },
-    {
-      name: 'Withdraw',
-      data: monthlyTotals.withdraw,
-    },
-  ];
-}, []);
 
 
 
@@ -230,6 +188,8 @@ const calculateTotals = useCallback((data: any[],date:string) => {
     transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
     config: { mass: 1, tension: 500, friction: 50 }
   });
+
+  
 
   const GetAllBP = useCallback(() => {
     axios.get('').then((e) => {
@@ -329,7 +289,7 @@ const calculateTotals = useCallback((data: any[],date:string) => {
           </div>
           
           <div className="w-full h-full">
-            <MemoizedRadarChart />
+            <MemoizedRadarChart data={data} />
           </div>
         </div>
       </motion.div>
@@ -359,7 +319,7 @@ const calculateTotals = useCallback((data: any[],date:string) => {
 
         <div className="absolute self-end z-30">
           <div className="w-[30vw] h-full m-6">
-            <MemoizedLineChart data={calculateMonthlyTotals(data)} />
+            <MemoizedLineChart data={data} />
           </div>
         </div>
 

@@ -15,6 +15,8 @@ const rankColors = [
 
 export function RegionRanking(data:any ) {
 
+  
+
 
   const maxValue = Math.max(...data.data.map((r:any) => r.value));
   const useOperationalSpring = (value: number, delay = 100) => {

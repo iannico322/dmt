@@ -1,8 +1,63 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { ApexOptions } from 'apexcharts';
 
-const RadarChart: React.FC = () => {
+const RadarChart: React.FC = (data:any) => {
+  const calculateLatestRegionalTotals = useCallback((data: any[]) => {
+    // Find the most recent date
+    const latestDate = new Date(Math.max(...data.map(item => new Date(item.date).getTime())));
+    
+    // Filter data to only include entries from the latest month
+    const latestMonthData = data.filter(item => {
+      const itemDate = new Date(item.date);
+      return itemDate.getMonth() === latestDate.getMonth() &&
+             itemDate.getFullYear() === latestDate.getFullYear();
+    });
+  
+    // Get unique regions from the filtered data
+    const uniqueRegions = [...new Set(latestMonthData.map(item => item.region))];
+    
+    // Initialize an object to hold totals for each region
+    const regionalTotals = uniqueRegions.reduce((acc, region) => {
+      acc[region] = {
+        operational: 0,
+        development: 0,
+        trainingOrOthers: 0,
+        withdraw: 0
+      };
+      return acc;
+    }, {} as Record<string, Record<string, number>>);
+  
+    // Accumulate totals for each region (only for the latest month)
+    latestMonthData.forEach(item => {
+      regionalTotals[item.region].operational += parseInt(String(item.operational)) || 0;
+      regionalTotals[item.region].development += parseInt(String(item.development)) || 0;
+      regionalTotals[item.region].trainingOrOthers += parseInt(String(item.trainingOrOthers)) || 0;
+      regionalTotals[item.region].withdraw += parseInt(String(item.withdraw)) || 0;
+    });
+  
+    // Transform into the exact format you want and sort by operational expenses
+    const result = uniqueRegions
+      .map(region => ({
+        name: region,
+        data: [
+          regionalTotals[region].operational,
+          regionalTotals[region].development,
+          regionalTotals[region].trainingOrOthers,
+          regionalTotals[region].withdraw
+        ],
+        operationalValue: regionalTotals[region].operational // for sorting
+      }))
+      .sort((a, b) => b.operationalValue - a.operationalValue)
+      .slice(0, 8)
+      .map(({ name, data }) => ({ name, data })); // Remove the sorting field
+  
+    return result;
+  }, []);
+  
+
+
+
   const options: ApexOptions = {
     chart: {
       type: 'radar',
@@ -78,15 +133,7 @@ const RadarChart: React.FC = () => {
     ],
   };
 
-  const series = [
-    { name: 'Region I', data: [65, 45, 30, 20] },
-    { name: 'Region II', data: [85, 60, 40, 25] },
-    { name: 'Region III', data: [75, 75, 50, 30] },
-    { name: 'Region IV-A', data: [80, 70, 45, 35] },
-    { name: 'MIMAROPA', data: [70, 55, 35, 25] },
-    { name: 'Region V', data: [60, 50, 40, 20] },
-    { name: 'Region VI', data: [55, 45, 35, 15] },
-  ];
+  const series = data ? calculateLatestRegionalTotals(data.data): [];;
 
   return (
     <div className="w-full h-full"> {/* Adjust the height percentage as needed */}

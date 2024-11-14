@@ -1,8 +1,51 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { ApexOptions } from 'apexcharts';
 
 const LineChart: React.FC = (data:any) => {
+  const calculateMonthlyTotals = useCallback((data: any[]) => {
+    // Initialize an array to hold totals for each month
+    const monthlyTotals = {
+      operational: Array(12).fill(0),
+      development: Array(12).fill(0),
+      trainingOrOthers: Array(12).fill(0),
+      withdraw: Array(12).fill(0),
+    };
+  
+    // Iterate through the data to accumulate totals by month
+    data.forEach(item => {
+      const itemDate = new Date(item.date);
+      const monthIndex = itemDate.getMonth(); // Get month index (0-11)
+  
+      // Accumulate totals for each category
+      monthlyTotals.operational[monthIndex] += parseInt(item.operational) || 0;
+      monthlyTotals.development[monthIndex] += parseInt(item.development) || 0;
+      monthlyTotals.trainingOrOthers[monthIndex] += parseInt(item.trainingOrOthers) || 0;
+      monthlyTotals.withdraw[monthIndex] += parseInt(item.withdraw) || 0;
+    });
+  
+    // Transform the monthly totals into the desired format
+  
+  
+    return [
+      {
+        name: 'Operational',
+        data: monthlyTotals.operational,
+      },
+      {
+        name: 'Developmental',
+        data: monthlyTotals.development,
+      },
+      {
+        name: 'Training',
+        data: monthlyTotals.trainingOrOthers,
+      },
+      {
+        name: 'Withdraw',
+        data: monthlyTotals.withdraw,
+      },
+    ];
+  }, []);
   // State to trigger initial animation
   const [chartKey, setChartKey] = useState(0);
 
@@ -102,9 +145,7 @@ const LineChart: React.FC = (data:any) => {
     },
   };
 
-  const series = data.data ? data.data: [];
-
-  console.log(data.data)
+  const series = data ? calculateMonthlyTotals(data.data): [];
 
   return (
     <div className="w-full h-[300px]">
