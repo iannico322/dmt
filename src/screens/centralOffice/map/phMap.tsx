@@ -7,33 +7,38 @@ import { useState } from "react";
 function PhMap({selectedMonth,data, setResult, setSelectedRegion, springProps,clickedRegion,setClickedRegion}: any) {
   const [hoveredRegion, setHoveredRegion] = useState<string | null>(null);
 // New state for clicked region
-  const months = [
-    "All Months", "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
 
-  const calculateTotals = (e: any, selectedMonth: string) => {
+
+  const getLatestMonth = (data: any[]): string => {
+    return data.reduce((latest, item) => {
+        const currentDate = new Date(item.date);
+        const latestDate = new Date(latest);
+        return currentDate > latestDate ? item.date : latest;
+    }, data[0]?.date || '');
+}; 
+  const calculateTotals = (data: any[],_date:string) => {
+    // Get the latest month from the data
+    const latestMonth = getLatestMonth(data);
+
     let totals = {
-      id: "PH",
-      operational: 0,
-      development: 0,
-      trainingOrOthers: 0,
-      withdraw: 0,
+        id: "PH",
+        operational: 0,
+        development: 0,
+        trainingOrOthers: 0,
+        withdraw: 0,
     };
 
-    e.filter((item: any) => {
-      if (selectedMonth === "All Months") return true;
-      const itemMonth = new Date(item.date).getMonth() + 1; // Extract month from date
-      return months[itemMonth] === selectedMonth;
-    }).map((item: any) => {
-      totals.operational += parseInt(item.operational);
-      totals.development += parseInt(item.development);
-      totals.trainingOrOthers += parseInt(item.trainingOrOthers);
-      totals.withdraw += parseInt(item.withdraw);
-    });
+    // Filter data for the latest month
+    data.filter((item: any) => item.date === latestMonth)
+        .forEach((item: any) => {
+            totals.operational += parseInt(item.operational);
+            totals.development += parseInt(item.development);
+            totals.trainingOrOthers += parseInt(item.trainingOrOthers);
+            totals.withdraw += parseInt(item.withdraw);
+        });
 
     return totals;
-  };
+};
   return (
     <animated.svg
         className=" animate__animated animate__fadeIn"
@@ -61,9 +66,6 @@ function PhMap({selectedMonth,data, setResult, setSelectedRegion, springProps,cl
               setClickedRegion(e.id); // Set the clicked region
               setSelectedRegion(`${e.name} \n (${e.id})`);
               let out: any = data.filter((x: any) => x.region === e.id );
-
-             
-              console.log("asds",out, selectedMonth,e.id)
               setResult( calculateTotals( out,selectedMonth));
             }}
             className="cursor-pointer"

@@ -35,9 +35,9 @@ const INITIAL_RESULT = {
 
 
 // Memoized child components
-const MemoizedRegionRanking = memo(RegionRanking);
+const MemoizedRegionRanking:any = memo(RegionRanking);
 const MemoizedRadarChart = memo(RadarChart);
-const MemoizedLineChart = memo(LineChart);
+const MemoizedLineChart:any = memo(LineChart);
 const MemoizedSummary = memo(Summary);
 
 // Memoized select component
@@ -88,22 +88,119 @@ const MapComponent: React.FC = () => {
     });
   }, []);
 
-  const calculateTotals = useCallback((data: any[], selectedMonth: string) => {
-    return data.reduce((totals, item) => {
-      if (selectedMonth !== "All Months") {
-        const itemMonth = new Date(item.date).getMonth() + 1;
-        if (MONTHS[itemMonth] !== selectedMonth) return totals;
-      }
-      
-      return {
-        ...totals,
-        operational: totals.operational + parseInt(item.operational),
-        development: totals.development + parseInt(item.development),
-        trainingOrOthers: totals.trainingOrOthers + parseInt(item.trainingOrOthers),
-        withdraw: totals.withdraw + parseInt(item.withdraw),
-      };
-    }, { ...INITIAL_RESULT });
-  }, []);
+  const getLatestMonth = (data: any[]): string => {
+    return data.reduce((latest, item) => {
+        const currentDate = new Date(item.date);
+        const latestDate = new Date(latest);
+        return currentDate > latestDate ? item.date : latest;
+    }, data[0]?.date || '');
+}; 
+
+const getTopRegions = useCallback((data:any) => {
+  // Step 1: Get the latest month available
+  const latestMonth:any = getLatestMonth(data); // Assume this function is defined elsewhere
+
+  // Step 2: Filter data for the latest month
+  const latestMonthData = data.filter((item:any) => item.date === latestMonth);
+
+  // Step 3: Create a map to accumulate operational values by region
+  const regionTotals:any = {};
+
+  latestMonthData.forEach((item:any)  => {
+    const region = item.region;
+    const operationalValue = parseInt(item.operational) || 0;
+
+    if (!regionTotals[region]) {
+      regionTotals[region] = 0;
+    }
+    regionTotals[region] += operationalValue;
+  });
+
+  // Step 4: Convert the regionTotals object to an array and sort it
+  const sortedRegions:any = Object.entries(regionTotals)
+    .map(([region, value], index) => ({ id: index + 1, region, value }))
+    .sort((a:any, b:any) => b.value - a.value); // Sort by value in descending order
+
+  // Step 5: Get the top 8 regions
+  return sortedRegions.slice(0, 8);
+}, []);
+
+
+const calculateMonthlyTotals = useCallback((data: any[]) => {
+  // Initialize an array to hold totals for each month
+  const monthlyTotals = {
+    operational: Array(12).fill(0),
+    development: Array(12).fill(0),
+    trainingOrOthers: Array(12).fill(0),
+    withdraw: Array(12).fill(0),
+  };
+
+  // Iterate through the data to accumulate totals by month
+  data.forEach(item => {
+    const itemDate = new Date(item.date);
+    const monthIndex = itemDate.getMonth(); // Get month index (0-11)
+
+    // Accumulate totals for each category
+    monthlyTotals.operational[monthIndex] += parseInt(item.operational) || 0;
+    monthlyTotals.development[monthIndex] += parseInt(item.development) || 0;
+    monthlyTotals.trainingOrOthers[monthIndex] += parseInt(item.trainingOrOthers) || 0;
+    monthlyTotals.withdraw[monthIndex] += parseInt(item.withdraw) || 0;
+  });
+
+  // Transform the monthly totals into the desired format
+
+
+  return [
+    {
+      name: 'Operational',
+      data: monthlyTotals.operational,
+    },
+    {
+      name: 'Developmental',
+      data: monthlyTotals.development,
+    },
+    {
+      name: 'Training',
+      data: monthlyTotals.trainingOrOthers,
+    },
+    {
+      name: 'Withdraw',
+      data: monthlyTotals.withdraw,
+    },
+  ];
+}, []);
+
+
+
+
+const calculateTotals = useCallback((data: any[],date:string) => {
+  // Get the latest month data (2024-10)
+  const latestMonth = getLatestMonth(data);
+  console.log(typeof latestMonth)
+  console.log(typeof date)
+
+  let shouldDate = date == 'All Months'? latestMonth:date;
+
+  console.log(shouldDate ,date, latestMonth )
+  return data.reduce((totals, item) => {
+    if (item.date !== shouldDate) return totals;
+   
+    return {
+      operational: totals.operational + parseInt(item.operational),
+      development: totals.development + parseInt(item.development),
+      trainingOrOthers: totals.trainingOrOthers + parseInt(item.trainingOrOthers),
+      withdraw: totals.withdraw + parseInt(item.withdraw),
+    };
+  }, {
+    operational: 0,
+    development: 0,
+    trainingOrOthers: 0,
+    withdraw: 0
+  });
+}, []);
+
+
+  
 
 
 
@@ -146,13 +243,23 @@ const MapComponent: React.FC = () => {
     setSelectedRegion(`Philippines eLGU IBPLS Status`);
   }, [GetAllBP]);
 
+
+  const monthToFormattedValue = (month: string) => {
+    const year = new Date().getFullYear(); // Get the current year
+    const monthIndex = MONTHS.indexOf(month); // Get the index of the selected month
+    if (monthIndex === 0) return 'All Months'; // Return 'All Months' for the first entry
+    // Return formatted value as YYYY-M (without leading zero for month)
+    return `${year}-${monthIndex}`; 
+};
+  
   const handleMonthChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = event.target.value;
+    const formattedMonth = monthToFormattedValue(selected);
     setSelectedMonth(selected);
     if (selected === 'All Months') {
       GetAllBP();
     } else {
-      setResult(calculateTotals(data, selected));
+      setResult(calculateTotals(data, formattedMonth));
     }
   }, [GetAllBP, calculateTotals, data]);
 
@@ -177,6 +284,7 @@ const MapComponent: React.FC = () => {
       initial={{ width: 0, opacity: 0 }}
       animate={{ width: calculatedWidth, opacity: 100 }}
       transition={{ duration: 0.8, ease: 'easeOut' }}
+      
     >
       <h1 
         className="py-5 pr-10 pl-1 truncate text-white font-semibold pointer-events-auto font-gextrabold text-2xl text-end"
@@ -205,7 +313,7 @@ const MapComponent: React.FC = () => {
   return (
     <div className="relative flex w-screen h-screen items-center justify-center">
       <div className="absolute z-20 w-[30vw] flex flex-col left-0 top-0 mt-[10vh]">
-        <MemoizedRegionRanking />
+        <MemoizedRegionRanking data={getTopRegions(data)} />
       </div>
 
       <motion.div 
@@ -250,8 +358,8 @@ const MapComponent: React.FC = () => {
         </div>
 
         <div className="absolute self-end z-30">
-          <div className="w-[45vw] h-full m-6">
-            <MemoizedLineChart />
+          <div className="w-[30vw] h-full m-6">
+            <MemoizedLineChart data={calculateMonthlyTotals(data)} />
           </div>
         </div>
 

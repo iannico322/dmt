@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { ApexOptions } from 'apexcharts';
 
-const LineChart: React.FC = () => {
+const LineChart: React.FC = (data:any) => {
   // State to trigger initial animation
   const [chartKey, setChartKey] = useState(0);
 
@@ -102,24 +102,9 @@ const LineChart: React.FC = () => {
     },
   };
 
-  const series = [
-    {
-      name: 'Operational',
-      data: [220, 340, 150, 70, 260, 310, 280, 220, 190, 250, 300, 270],
-    },
-    {
-      name: 'Developmental',
-      data: [90, 150, 180, 250, 210, 160, 190, 220, 240, 200, 180, 160],
-    },
-    {
-      name: 'Training',
-      data: [160, 190, 80, 170, 170, 150, 140, 160, 190, 210, 180, 150],
-    },
-    {
-      name: 'Withdraw',
-      data: [150, 200, 90, 150, 120, 140, 160, 130, 110, 140, 170, 190],
-    },
-  ];
+  const series = data.data ? data.data: [];
+
+  console.log(data.data)
 
   return (
     <div className="w-full h-[300px]">
