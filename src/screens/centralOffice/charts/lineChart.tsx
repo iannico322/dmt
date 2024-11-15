@@ -78,10 +78,10 @@ const LineChart: React.FC = (data:any) => {
       },
     },
     colors: [
-      '#10b981', // emerald-500 (Operational)
-      '#f59e0b', // amber-500 (Developmental)
-      '#ec4899', // pink-500 (Training)
-      '#06b6d4', // cyan-500 (Withdraw)
+      '#4ade80', // emerald-500 (Operational)
+      '#facc15', // amber-500 (Developmental)
+      '#ea580c', // pink-500 (Training)
+      '#dc2626', // cyan-500 (Withdraw)
     ],
     stroke: {
       width: 3,

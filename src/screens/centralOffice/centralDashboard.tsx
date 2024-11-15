@@ -284,7 +284,7 @@ const calculateTotals = useCallback((data: any[],date:string) => {
         <div className="z-30 absolute h-[58vh] w-[450px] ml-5 flex left-0 bottom-0 flex-col items-end">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-0 translate-y-10">
             <h2 className="text-gray-600 sm:text-xl font-gmedium">Total Operational</h2>
-            <h1 className="text-[#1a237e] text-4xl sm:text-6xl font-gbold">2353</h1>
+            <h1 className="text-[#1a237e] text-4xl sm:text-6xl font-gbold">{result.operational}</h1>
             <p className="text-gray-600 font-gsemibold">eLGU across the Philippines</p>
           </div>
           
