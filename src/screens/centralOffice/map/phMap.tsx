@@ -1,9 +1,13 @@
 import { animated } from "react-spring";
 import phRegions from "./phRegions.json";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 
-
+// Constants outside component
+const MONTHS = [
+  "All Months", "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
 function PhMap({selectedMonth,data, setResult, setSelectedRegion, springProps,clickedRegion,setClickedRegion}: any) {
   const [hoveredRegion, setHoveredRegion] = useState<string | null>(null);
 // New state for clicked region
@@ -16,9 +20,27 @@ function PhMap({selectedMonth,data, setResult, setSelectedRegion, springProps,cl
         return currentDate > latestDate ? item.date : latest;
     }, data[0]?.date || '');
 }; 
+
+const monthToFormattedValue = useCallback((month: string) => {
+  const year = new Date().getFullYear();
+  const monthIndex = MONTHS.indexOf(month);
+  if (monthIndex === 0) return 'All Months';
+  return `${year}-${monthIndex}`;
+}, []);
   const calculateTotals = (data: any[],_date:string) => {
     // Get the latest month from the data
-    const latestMonth = getLatestMonth(data);
+    if (!data || data.length === 0) {
+      return [];
+    }
+
+    // Determine the month to use for filtering
+    let latestMonth: string = getLatestMonth(data);
+    
+    // If a specific month is selected, use that instead of the latest month
+    if (selectedMonth && selectedMonth !== 'All Months') {
+      const formattedMonth = monthToFormattedValue(selectedMonth);
+      latestMonth = formattedMonth;
+    }
 
     let totals = {
         id: "PH",

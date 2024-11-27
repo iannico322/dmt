@@ -1,13 +1,13 @@
-import { useEffect, useState, useMemo, useCallback,memo } from "react";
+import React, { useEffect, useState, useMemo, useCallback, memo } from "react";
 import { motion } from 'framer-motion';
 import Summary from "./charts/summary";
 import PhMap from "./map/phMap";
 import { useGesture } from "react-use-gesture";
-import { useSpring } from "react-spring";
 import axios from "./../../plugin/axios";
 import { RegionRanking } from "./charts/ranking";
 import RadarChart from "./charts/radaChart";
 import LineChart from "./charts/lineChart";
+import { useSpring, animated } from "react-spring";
 
 // Constants outside component
 const MONTHS = [
@@ -16,12 +16,12 @@ const MONTHS = [
 ];
 
 const PROJECTS = [
-  'All Project',
+  
   'Business Permit',
   'Working Permit',
   'Certificate of Occupancy',
   'Local Civil Registry',
-  'eCedula'
+  'eCedula','All Project'
 ];
 
 const INITIAL_RESULT = {
@@ -32,12 +32,10 @@ const INITIAL_RESULT = {
   withdraw: 0,
 };
 
-
-
 // Memoized child components
-const MemoizedRegionRanking:any = memo(RegionRanking);
-const MemoizedRadarChart:any = memo(RadarChart);
-const MemoizedLineChart:any = memo(LineChart);
+const MemoizedRegionRanking: any = memo(RegionRanking);
+const MemoizedRadarChart: any = memo(RadarChart);
+const MemoizedLineChart: any = memo(LineChart);
 const MemoizedSummary = memo(Summary);
 
 // Memoized select component
@@ -82,7 +80,7 @@ const MapComponent: React.FC = () => {
   const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
 
   // Debounced transform update
-  const debouncedSetTransform:any = useCallback((newTransform: typeof transform) => {
+  const debouncedSetTransform: any = useCallback((newTransform: typeof transform) => {
     requestAnimationFrame(() => {
       setTransform(newTransform);
     });
@@ -90,87 +88,95 @@ const MapComponent: React.FC = () => {
 
   const getLatestMonth = (data: any[]): string => {
     return data.reduce((latest, item) => {
-        const currentDate = new Date(item.date);
-        const latestDate = new Date(latest);
-        return currentDate > latestDate ? item.date : latest;
+      const currentDate = new Date(item.date);
+      const latestDate = new Date(latest);
+      return currentDate > latestDate ? item.date : latest;
     }, data[0]?.date || '');
-}; 
+  };
 
-const getTopRegions = useCallback((data:any) => {
-  // Step 1: Get the latest month available
-  const latestMonth:any = getLatestMonth(data); // Assume this function is defined elsewhere
+  const monthToFormattedValue = useCallback((month: string) => {
+    const year = new Date().getFullYear();
+    const monthIndex = MONTHS.indexOf(month);
+    if (monthIndex === 0) return 'All Months';
+    return `${year}-${monthIndex}`;
+  }, []);
 
-  // Step 2: Filter data for the latest month
-  const latestMonthData = data.filter((item:any) => item.date === latestMonth);
-
-  // Step 3: Create a map to accumulate operational values by region
-  const regionTotals:any = {};
-
-  latestMonthData.forEach((item:any)  => {
-    const region = item.region;
-    const operationalValue = parseInt(item.operational) || 0;
-
-    if (!regionTotals[region]) {
-      regionTotals[region] = 0;
+  const getTopRegions = useCallback((data: any[]) => {
+    // If no data is available, return an empty array
+    if (!data || data.length === 0) {
+      return [];
     }
-    regionTotals[region] += operationalValue;
-  });
 
-  // Step 4: Convert the regionTotals object to an array and sort it
-  const sortedRegions:any = Object.entries(regionTotals)
-    .map(([region, value], index) => ({ id: index + 1, region, value }))
-    .sort((a:any, b:any) => b.value - a.value); // Sort by value in descending order
+    // Determine the month to use for filtering
+    let latestMonth: string = getLatestMonth(data);
+    
+    // If a specific month is selected, use that instead of the latest month
+    if (selectedMonth && selectedMonth !== 'All Months') {
+      const formattedMonth = monthToFormattedValue(selectedMonth);
+      latestMonth = formattedMonth;
+    }
 
-  // Step 5: Get the top 8 regions
-  return sortedRegions.slice(0, 8);
-}, []);
+    // Filter data for the selected month
+    const filteredMonthData = data.filter((item: any) => item.date === latestMonth);
 
+    // If no data for the selected month, fall back to all data
+    const dataToUse = filteredMonthData.length > 0 ? filteredMonthData : data;
 
+    // Create a map to accumulate operational values by region
+    const regionTotals: { [key: string]: number } = {};
+    
+    dataToUse.forEach((item: any) => {
+      const region = item.region;
+      const operationalValue = parseInt(item.operational) || 0;
 
+      // Accumulate operational values for each region
+      regionTotals[region] = (regionTotals[region] || 0) + operationalValue;
+    });
 
+    // Convert the regionTotals object to a sorted array of top regions
+    const sortedRegions = Object.entries(regionTotals)
+      .map(([region, value], index) => ({ 
+        id: index + 1, 
+        region, 
+        value: Number(value) 
+      }))
+      .sort((a, b) => b.value - a.value);
 
+    // Return top 8 regions, or all if less than 8
+    return sortedRegions.slice(0, 8);
+  }, [selectedMonth, monthToFormattedValue]);
 
+  const calculateTotals = useCallback((data: any[], date: string) => {
+    // Get the latest month data
+    const latestMonth = getLatestMonth(data);
+    const shouldDate = date === 'All Months' ? latestMonth : date;
 
-const calculateTotals = useCallback((data: any[],date:string) => {
-  // Get the latest month data (2024-10)
-  const latestMonth = getLatestMonth(data);
-  console.log(typeof latestMonth)
-  console.log(typeof date)
-
-  let shouldDate = date == 'All Months'? latestMonth:date;
-
-  console.log(shouldDate ,date, latestMonth )
-  return data.reduce((totals, item) => {
-    if (item.date !== shouldDate) return totals;
-   
-    return {
-      operational: totals.operational + parseInt(item.operational),
-      development: totals.development + parseInt(item.development),
-      trainingOrOthers: totals.trainingOrOthers + parseInt(item.trainingOrOthers),
-      withdraw: totals.withdraw + parseInt(item.withdraw),
-    };
-  }, {
-    operational: 0,
-    development: 0,
-    trainingOrOthers: 0,
-    withdraw: 0
-  });
-}, []);
-
-
-  
-
-
+    return data.reduce((totals, item) => {
+      if (item.date !== shouldDate) return totals;
+     
+      return {
+        operational: totals.operational + parseInt(item.operational),
+        development: totals.development + parseInt(item.development),
+        trainingOrOthers: totals.trainingOrOthers + parseInt(item.trainingOrOthers),
+        withdraw: totals.withdraw + parseInt(item.withdraw),
+      };
+    }, {
+      operational: 0,
+      development: 0,
+      trainingOrOthers: 0,
+      withdraw: 0
+    });
+  }, []);
 
   const bind = useGesture({
     onDrag: ({ offset: [x, y] }) => {
       debouncedSetTransform((prev: any) => ({ ...prev, x, y }));
     },
     onPinch: ({ offset: [d] }) => {
-      debouncedSetTransform((prev:any) => ({ ...prev, scale: Math.max(0.5, d / 100) }));
+      debouncedSetTransform((prev: any) => ({ ...prev, scale: Math.max(0.5, d / 100) }));
     },
     onWheel: ({ delta: [, dy] }) => {
-      debouncedSetTransform((prev:any) => ({
+      debouncedSetTransform((prev: any) => ({
         ...prev,
         scale: Math.max(0.5, prev.scale - dy * 0.001)
       }));
@@ -189,8 +195,6 @@ const calculateTotals = useCallback((data: any[],date:string) => {
     config: { mass: 1, tension: 500, friction: 50 }
   });
 
-  
-
   const GetAllBP = useCallback(() => {
     axios.get('').then((e) => {
       setData(e.data);
@@ -203,15 +207,6 @@ const calculateTotals = useCallback((data: any[],date:string) => {
     setSelectedRegion(`Philippines eLGU IBPLS Status`);
   }, [GetAllBP]);
 
-
-  const monthToFormattedValue = (month: string) => {
-    const year = new Date().getFullYear(); // Get the current year
-    const monthIndex = MONTHS.indexOf(month); // Get the index of the selected month
-    if (monthIndex === 0) return 'All Months'; // Return 'All Months' for the first entry
-    // Return formatted value as YYYY-M (without leading zero for month)
-    return `${year}-${monthIndex}`; 
-};
-  
   const handleMonthChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = event.target.value;
     const formattedMonth = monthToFormattedValue(selected);
@@ -221,7 +216,7 @@ const calculateTotals = useCallback((data: any[],date:string) => {
     } else {
       setResult(calculateTotals(data, formattedMonth));
     }
-  }, [GetAllBP, calculateTotals, data]);
+  }, [GetAllBP, calculateTotals, data, monthToFormattedValue]);
 
   const calculatedWidth = useMemo(() => {
     const charWidth = 16;
@@ -244,7 +239,6 @@ const calculateTotals = useCallback((data: any[],date:string) => {
       initial={{ width: 0, opacity: 0 }}
       animate={{ width: calculatedWidth, opacity: 100 }}
       transition={{ duration: 0.8, ease: 'easeOut' }}
-      
     >
       <h1 
         className="py-5 pr-10 pl-1 truncate text-white font-semibold pointer-events-auto font-gextrabold text-2xl text-end"
@@ -270,6 +264,13 @@ const calculateTotals = useCallback((data: any[],date:string) => {
     />
   ), [springProps, data, calculateTotals, selectedMonth, selectedRegion, clickedRegion]);
 
+  const OperationalSpring = useSpring({
+    from: { number: 0 },
+    number: result ? result.operational : 0,
+    delay: 140,
+    config: { mass: 1, tension: 180, friction: 12 },
+  });
+
   return (
     <div className="relative flex w-screen h-screen items-center justify-center">
       <div className="absolute z-20 w-[30vw] flex flex-col left-0 top-0 mt-[10vh]">
@@ -281,15 +282,24 @@ const calculateTotals = useCallback((data: any[],date:string) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="z-30 absolute h-[58vh] w-[450px] ml-5 flex left-0 bottom-0 flex-col items-end">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-0 translate-y-10">
+        <div className="z-30 absolute h-[58vh] w-[1250px] items-start pointer-events-none ml-5 flex left-0 bottom-0 flex-col">
+          <div className="flex flex-col sm:flex-row sm:justify-between ml-[20vw] sm:items-start gap-0 translate-y-10">
             <h2 className="text-gray-600 sm:text-xl font-gmedium">Total Operational</h2>
-            <h1 className="text-[#1a237e] text-4xl sm:text-6xl font-gbold">{result.operational}</h1>
-            <p className="text-gray-600 font-gsemibold">eLGU across the Philippines</p>
+            <h1 className="text-[#1a237e] text-4xl sm:text-6xl font-gbold">
+              <animated.span>
+                {OperationalSpring.number.to((n) => n.toFixed(0))}
+              </animated.span>
+            </h1>
+            <p className="text-gray-600 font-gsemibold text-right">
+              eLGU across the {selectedRegion === "Philippines eLGU IBPLS Status" ? "Philippines" : selectedRegion}
+            </p>
           </div>
           
-          <div className="w-full h-full">
-            <MemoizedRadarChart data={data} />
+          <div className="max-w-[450px] w-full h-full pointer-events-auto">
+          <MemoizedRadarChart 
+            data={data} 
+            selectedMonth={selectedMonth} 
+          />
           </div>
         </div>
       </motion.div>
