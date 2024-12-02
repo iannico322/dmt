@@ -16,10 +16,14 @@ const Central= lazy(() =>
   wait(300).then(() => import("./screens/centralOffice/centralDashboard.tsx"))
 );
 
+const CentralF= lazy(() =>
+  wait(300).then(() => import("./screens/centralOffice/Central.tsx"))
+);
+
 const router = createBrowserRouter([
   {
     path: "/dmt/",
-    element: <App />,
+    element: <CentralF />,
     
     children: [
       {
@@ -30,7 +34,7 @@ const router = createBrowserRouter([
         path: "/dmt/dashboard",
         element: <>
         <Suspense fallback={<Loader />}>
-          <Central/>
+          <CentralF/>
         </Suspense>
       </>,
       },
