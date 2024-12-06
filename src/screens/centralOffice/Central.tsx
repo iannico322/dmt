@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { Chart } from './testing/Chart';
 import SelectDropdown from './testing/Dropdown';
 import RegionsDropdown from './testing/RegionList';
+import ChartsDashboard from './testing/Charts';
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const years = ['2024', '2023', '2022', '2021'];
 const INITIAL_RESULT = {
@@ -165,7 +166,7 @@ function Central() {
           <div 
             ref={mapContainerRef}
             {...bind()}
-            className='relative w-full h-[70vh] mt-[80px] flex flex-col bg-[#ebeff5] overflow-hidden'
+            className='relative w-full h-[70vh] mt-[80px] flex flex-col bg-[#ebeff5] rounded-sm border border-border overflow-hidden'
             style={{
               touchAction: 'none',
               userSelect: 'none',
@@ -175,13 +176,13 @@ function Central() {
             <div className="absolute z-20 bottom-4 right-4 flex flex-col space-y-2">
               <button 
                 onClick={handleZoomIn} 
-                className="p-2 bg-gray-700 text-white rounded shadow hover:bg-gray-800"
+                className="p-2 bg-[#323232] text-white rounded shadow hover:bg-gray-800"
               >
                 +
               </button>
               <button 
                 onClick={handleZoomOut} 
-                className="p-2 bg-gray-700 text-white rounded shadow hover:bg-gray-800"
+                className="p-2 bg-[#323232] text-white rounded shadow hover:bg-gray-800"
               >
                 -
               </button>
@@ -199,7 +200,8 @@ function Central() {
             </animated.div>
            
           </div>
-          <Chart/>
+          {/* <Chart/> */}
+          <ChartsDashboard/>
 </div>
 
         </div>

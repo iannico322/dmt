@@ -1,18 +1,31 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
-import  { useState } from "react";
+import  { useEffect, useState } from "react";
 
 const DataPresentationOptions = () => {
   const [isOpen, setIsOpen] = useState(true);
 
-  const [presentationOptions, setPresentationOptions] = useState([
-    { name: "Bar Graph", state: false },
-    { name: "Line Graph", state: false },
-    { name: "Pie Graph", state: false },
-  ]);
+  const [presentationOptions, setPresentationOptions] = useState(() => {
+    // Try to get the item from localStorage
+    const storedCharts = localStorage.getItem('charts');
+    
+    // Parse the stored item, or use a default value if it doesn't exist
+    return storedCharts ? JSON.parse(storedCharts) : [
+      {"name":"Bar Graph","state":true},
+      {"name":"Line Graph","state":true},
+      {"name":"Pie Graph","state":true}
+    ];
+  });
+
+
+  
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
+
+  useEffect(()=>{
+    localStorage.setItem('charts',JSON.stringify(presentationOptions))
+  },[presentationOptions])
 
   const handleCheckboxChange = (optionName: string) => {
     setPresentationOptions((prevOptions) =>

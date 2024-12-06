@@ -77,10 +77,10 @@ const monthToFormattedValue = useCallback((month: string) => {
             d={e.d}
             fill={
               clickedRegion === e.id
-                ? "#1c1d6e" // Color when the region is clicked
+                ? "#1e40af" // Color when the region is clicked
                 : hoveredRegion === e.id
-                ? "#1c1d6e" // Color when the region is hovered
-                : "#3e4a5a" // Default color
+                ? "#1e40af" // Color when the region is hovered
+                : "#323232" // Default color
             }
             onMouseEnter={() => setHoveredRegion(e.id)}
             onMouseLeave={() => setHoveredRegion(null)}
