@@ -8,12 +8,10 @@ import { Suspense, lazy } from "react";
 import NotFound from "./screens/notFound";
 import Loader from './components/loader/loader.tsx';
 
-const Page1= lazy(() =>
-  wait(1300).then(() => import("./screens/page1.tsx"))
-);
 
-const Central= lazy(() =>
-  wait(300).then(() => import("./screens/centralOffice/centralDashboard.tsx"))
+
+const UtiStatus= lazy(() =>
+  wait(300).then(() => import('./screens/centralOffice/utistatus/UtiStatus.tsx'))
 );
 
 const CentralF= lazy(() =>
@@ -23,7 +21,7 @@ const CentralF= lazy(() =>
 const router = createBrowserRouter([
   {
     path: "/dmt/",
-    element: <CentralF />,
+    element: <UtiStatus />,
     
     children: [
       {
@@ -42,7 +40,7 @@ const router = createBrowserRouter([
         path: "/dmt/page2",
         element: <>
         <Suspense fallback={<Loader />}>
-          <Page1 />
+          <UtiStatus />
         </Suspense>
       </>,
       },

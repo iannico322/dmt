@@ -2,7 +2,7 @@
 
 function Page1() {
   return (
-    <div>Page1</div>
+    <div className=" z-50 bg-black w-screen h-screen">Page1 asdadasdasd</div>
   )
 }
 
