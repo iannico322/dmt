@@ -32,32 +32,32 @@ const LGUServiceDropdown = () => {
     <div
       className={
         isOpen
-          ? "relative w-full h-[270px] rounded-[100px]"
-          : "rounded-none relative w-full"
+          ? "relative mt-2 outline-none w-full h-[270px] rounded-[100px]"
+          : "rounded-none mt-2 outline-none relative w-full"
       }
     >
       {/* Dropdown Box */}
       <div
-        className={`border-gray-300 border rounded-none shadow-sm ${
+        className={`border-gray-300 outline-none mt-2 border-x-0 border-y-2 rounded-none  ${
           isOpen ? "" : ""
         }`}
       >
         {/* Dropdown Button */}
         <button
           onClick={toggleDropdown}
-          className="w-full text-left rounded-none bg-white px-4 py-2 focus:outline-none flex justify-between focus:ring-2 focus:ring-blue-500 font-gsemibold"
+          className="w-full text-left outline-none rounded-none text-white px-4 py-2 focus:outline-none flex justify-between  font-gsemibold"
         >
-          eLGU Services <span>{isOpen ? <ChevronUp /> : <ChevronDown />}</span>
+          eLGU Services <span>{isOpen ? <ChevronUp className=" rotate-90" /> : <ChevronDown />}</span>
         </button>
       </div>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute w-full bg-white border border-t-0 border-gray-300 pb-2 pt-2 shadow-sm">
+        <div className="absolute w-full outline-none text-white pb-2 pt-2 ">
           {services.map((service, index) => (
             <label
               key={index}
-              className="flex items-center px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+              className="flex items-center px-4 py-2 text-sm  cursor-pointer"
             >
               <input
                 type="checkbox"

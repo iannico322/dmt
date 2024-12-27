@@ -1,6 +1,7 @@
-import React, { useCallback, useMemo, useState, useRef, memo } from 'react';
+import React, { useCallback, useMemo, useState, useRef, memo, useEffect } from 'react';
 import { animated, useSpring } from 'react-spring';
 import { useGesture } from 'react-use-gesture';
+import debounce from 'lodash/debounce';
 import LGUServicesDropdown from './testing/ServicesList';
 import DataPresentationOptions from './testing/DataPresentationOptions';
 import PhMap from './map/phMap';
@@ -10,6 +11,10 @@ import { Chart } from './testing/Chart';
 import SelectDropdown from './testing/Dropdown';
 import RegionsDropdown from './testing/RegionList';
 import ChartsDashboard from './testing/Charts';
+import { Calendar } from "@/components/ui/calendar";
+import DatePicker from './testing/DatePicker';
+import RegionSelector from './testing/RegionList';
+
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const years = ['2024', '2023', '2022', '2021'];
 const INITIAL_RESULT = {
@@ -24,12 +29,14 @@ function Central() {
   const [selectedYear, setSelectedYear] = useState('');
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [selectedPresentation, setSelectedPresentation] = useState('Bar Graph');
-
   const [result, setResult] = useState(INITIAL_RESULT);
   const [data, setData] = useState<any[]>([]);
   const [clickedRegion, setClickedRegion] = useState<string | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string>('All Months');
-  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<string[] | null>(null);
+  const [selectedValue, setSelectedValue] = useState<any>("");
+  const [selectedValue2, setSelectedValue2] = useState<any>("");
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   // Transform state for zoom and pan
   const [transform, setTransform] = useState({
@@ -38,41 +45,81 @@ function Central() {
     y: 0
   });
 
-  // Ref for the map container
+  // Ref for the map container and transform state
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const transformRef = useRef({
+    scale: 1,
+    x: 0,
+    y: 0
+  });
 
-  // Update transform state for zoom and pan
-  const debouncedSetTransform = useCallback((newTransform: Partial<typeof transform>) => {
-    setTransform(prev => ({
-      ...prev,
-      ...newTransform
-    }));
-  }, []);
-
-  // Gesture handling for drag (no zooming via scroll anymore)
-  const bind = useGesture(
-    {
-      onDrag: ({ offset: [x, y] }) => {
-        debouncedSetTransform({ x, y });
-      }
-    },
-    {
-      drag: {
-        from: () => [transform.x, transform.y],
-        bounds: { left: -300, right: 300, top: -300, bottom: 300 },
-      }
-    }
+  // Create a debounced function to update the transform state
+  const debouncedStateUpdate = useCallback(
+    debounce((newTransform: typeof transformRef.current) => {
+      setTransform(newTransform);
+    }, 16),
+    []
   );
 
-  // Spring animation for smooth transitions
-  const springProps = useSpring({
-    transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
+  // Update the ref and trigger debounced state update
+  const updateTransform = useCallback((newTransform: Partial<typeof transformRef.current>) => {
+    transformRef.current = {
+      ...transformRef.current,
+      ...newTransform
+    };
+    debouncedStateUpdate(transformRef.current);
+  }, [debouncedStateUpdate]);
+
+  // Spring animation with manual api control
+  const [springProps, api] = useSpring(() => ({
+    transform: `translate(0px, 0px) scale(1)`,
     config: {
       mass: 1,
       tension: 100,
       friction: 20,
     },
-  });
+  }));
+
+  // Gesture handling for drag
+  const bind = useGesture(
+    {
+      onDrag: ({ offset: [x, y] }) => {
+        transformRef.current.x = x;
+        transformRef.current.y = y;
+        // Use the ref value directly for the spring animation
+        api.start({
+          transform: `translate(${x}px, ${y}px) scale(${transformRef.current.scale})`
+        });
+      },
+      onDragEnd: () => {
+        // Only update state when dragging ends
+        debouncedStateUpdate(transformRef.current);
+      }
+    },
+    {
+      drag: {
+        from: () => [transformRef.current.x, transformRef.current.y],
+        bounds: { left: -300, right: 300, top: -300, bottom: 300 },
+      }
+    }
+  );
+
+  // Zoom In and Zoom Out functions
+  const handleZoomIn = useCallback(() => {
+    const newScale = Math.min(transformRef.current.scale + 0.1, 3);
+    updateTransform({ scale: newScale });
+    api.start({
+      transform: `translate(${transformRef.current.x}px, ${transformRef.current.y}px) scale(${newScale})`
+    });
+  }, [updateTransform, api]);
+
+  const handleZoomOut = useCallback(() => {
+    const newScale = Math.max(transformRef.current.scale - 0.1, 0.8);
+    updateTransform({ scale: newScale });
+    api.start({
+      transform: `translate(${transformRef.current.x}px, ${transformRef.current.y}px) scale(${newScale})`
+    });
+  }, [updateTransform, api]);
 
   // Memoized map component
   const memoizedPhMap = useMemo(
@@ -92,129 +139,67 @@ function Central() {
     [springProps, data, selectedMonth, selectedRegion, clickedRegion]
   );
 
-  // Zoom In and Zoom Out functions
-  const handleZoomIn = () => {
-    debouncedSetTransform({
-      scale: Math.min(transform.scale + 0.2, 3), // Limit max zoom level
-    });
-  };
+  useEffect(() => {
+    console.log(selectedRegion);
 
-  const handleZoomOut = () => {
-    debouncedSetTransform({
-      scale: Math.max(transform.scale - 0.2, 0.8), // Limit min zoom level
-    });
-  };
-
-
-
-  // Memoized select component
-
- const [selectedValue,setSelectedValue] =  useState<any>("")
- const [selectedValue2,setSelectedValue2] =  useState<any>("")
+  }, [selectedRegion]);
+  console.log('Central Office Rendered');
 
   return (
-    <div className="min-h-[500vh] flex flex-col items-center">
-      {/* Header */}
-      <div className='sticky top-0 h-[120px] pointer-events-none  pt-5 flex z-[9999] justify-between items-start mt-10 mx-5 w-full col-span-2'>
-        <Link className="ml-5 flex gap-2" to="/dmt/">
-          <img src={viteLogo} className="logo h-10 object-contain" alt="DICT logo" />
-        </Link>
-        <div className="flex items-center pr-5">
-          <span className="text-gray-600 font-semibold">Welcome, (Omair) </span>
-        </div>
-      </div>
-
-      <div className='w-[90%] flex flex-col gap-10 min-h-[20vh]'>
-      
-        <div className='w-full items-center z-[999]  justify-between px-5 translate-y-[70px] flex min-h-[100px] bg-[#ebeff5] border rounded-sm md:flex-col md:py-2 md:gap-3'>
-            <h1 className=' absolute translate-y-[-80px] translate-x-[-20px] font-gsemibold text-xl'>Data Monitoring Dashboard</h1>
-        <div className=' flex gap-2 w-[500px] md:w-full'>
-        <SelectDropdown
-            options={months}
-            value={selectedValue}
-            onChange={(e) => setSelectedValue(e.target.value)}
-            id="monthDropdown"
-            placeholder="Select a month"
-            />
-
-<SelectDropdown
-            options={years}
-            value={selectedValue2}
-            onChange={(e) => setSelectedValue2(e.target.value)}
-            id="yearDropdown"
-            placeholder="Select a year"
-            />
-
-        </div>
-        <div className=' z-[99999] w-[30%] md:w-full'>
-            <RegionsDropdown/>
-        </div>
-       
-        
-        </div>
-        <div className='relative w-full flex md:flex-col h-full justify-between  gap-10'>
-          {/* Sidebar */}
-          <div className='sticky top-0 z-[99] flex flex-col gap-4 pt-[80px] md:pt-[100px] w-[30%] md:w-[100%] h-full '>
-            <LGUServicesDropdown />
-            <DataPresentationOptions />
+    <div className="min-h-[300vh] w-full z-10 flex flex-col items-center">
+      <div className='w-[90%] flex flex-col gap-10 min-h-[10px]'>
+        <div className='w-ful items-center z-[4] justify-between px-5 flex min-h-[100px] bg-[#ebeff5] border rounded-sm md:flex-col md:py-2 md:gap-3'>
+          <div className='flex gap-2 w-[500px] md:w-full'>
+            <DatePicker value={selectedDate} onChange={setSelectedDate} />
           </div>
-          
-          {/* Map Container */}
-          <div className=' w-[70%] md:w-[100%] h-full flex flex-col gap-10'>
+          <div className='z-[99999] w-[30%] md:w-full'>
+            <RegionSelector/>
+          </div>
+        </div>
 
-          
-          <div 
-            ref={mapContainerRef}
-            {...bind()}
-            className='relative w-full h-[70vh] mt-[80px] flex flex-col bg-[#ebeff5] rounded-sm border border-border overflow-hidden'
-            style={{
-              touchAction: 'none',
-              userSelect: 'none',
-            }}
-          >
-            {/* Zoom Buttons */}
-            <div className="absolute z-20 bottom-4 right-4 flex flex-col space-y-2">
-              <button 
-                onClick={handleZoomIn} 
-                className="p-2 bg-[#323232] text-white rounded shadow hover:bg-gray-800"
-              >
-                +
-              </button>
-              <button 
-                onClick={handleZoomOut} 
-                className="p-2 bg-[#323232] text-white rounded shadow hover:bg-gray-800"
-              >
-                -
-              </button>
-            </div>
-
-            <animated.div
+        <div className='relative w-full flex md:flex-col h-full justify-between gap-10'>
+          <div className='w-full h-full flex flex-col gap-10'>
+            <div 
+              ref={mapContainerRef}
+              {...bind()}
+              className='relative w-full h-[70vh] flex flex-col bg-[#ebeff5] rounded-sm border border-border overflow-hidden'
               style={{
-                width: '100%',
-                height: '100%',
-                transformOrigin: 'center center',
-                ...springProps,
+                touchAction: 'none',
+                userSelect: 'none',
               }}
             >
-              {memoizedPhMap}
-            </animated.div>
-           
+              <div className="absolute z-20 bottom-4 right-4 flex flex-col space-y-2">
+                <button 
+                  onClick={handleZoomIn} 
+                  className="p-2 bg-[#323232] text-white rounded shadow hover:bg-gray-800"
+                >
+                  +
+                </button>
+                <button 
+                  onClick={handleZoomOut} 
+                  className="p-2 bg-[#323232] text-white rounded shadow hover:bg-gray-800"
+                >
+                  -
+                </button>
+              </div>
+
+              <animated.div
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  transformOrigin: 'center center',
+                  ...springProps,
+                }}
+              >
+                {memoizedPhMap}
+              </animated.div>
+            </div>
+            <ChartsDashboard/>
           </div>
-          {/* <Chart/> */}
-          <ChartsDashboard/>
-</div>
-
         </div>
-
-
-      
       </div>
-
-      {/* Additional Divs */}
-      <div className='sticky top-0 mt-[120px] w-[90%] flex flex-col h-[20vh] bg-black'></div>
-      <div className='sticky top-0 mt-[120px] w-[90%] flex flex-col h-[100vh] bg-red-600'></div>
     </div>
   );
 }
 
-export default Central;
+export default memo(Central);

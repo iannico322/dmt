@@ -1,88 +1,125 @@
-import { ChevronDown, ChevronUp } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 
-const RegionsDropdown = () => {
+const groupOfIslands = [
+  { id: 'luzon', name: 'Luzon' },
+  { id: 'visayas', name: 'Visayas' },
+  { id: 'mindanao', name: 'Mindanao' },
+];
+
+const regions = [
+  { id: 'I', name: 'I' },
+  { id: 'II', name: 'II' },
+  { id: 'III', name: 'III' },
+  { id: 'IV-A', name: 'IV-A' },
+  { id: 'V', name: 'V' },
+  { id: 'CAR', name: 'CAR' },
+  { id: 'NCR', name: 'NCR' },
+  { id: 'VI', name: 'VI' },
+  { id: 'VII', name: 'VII' },
+  { id: 'VIII', name: 'VIII' },
+  { id: 'IX', name: 'IX' },
+  { id: 'X', name: 'X' },
+  { id: 'XI', name: 'XI' },
+  { id: 'XII', name: 'XII' },
+  { id: 'XIII', name: 'XIII' },
+  { id: 'BARMM', name: 'BARMM' },
+  { id: 'NIR', name: 'NIR' }
+];
+
+const regionsByGroup = {
+  luzon: ['I', 'II', 'III', 'IV-A', 'V', 'CAR', 'NCR'],
+  visayas: ['VI', 'VII', 'VIII', 'NIR'],
+  mindanao: ['IX', 'X', 'XI', 'XII', 'XIII', 'BARMM']
+};
+
+const RegionSelector = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
+  const [selectedIslands, setSelectedIslands] = useState<string[]>([]);
 
-  // Updated services array as JSON
-  const [services, setServices] = useState([
-    { name: "Ilocos Region (Region I)", state: false },
-    { name: "Cagayan Valley (Region II)", state: false },
-    { name: "Central Luzon (Region III)", state: false },
-    { name: "CALABARZON (Region IV-A)", state: false },
-    { name: "MIMAROPA (Region IV-B)", state: false },
-    { name: "Bicol Region (Region V)", state: false },
-    { name: "Western Visayas (Region VI)", state: false },
-    { name: "Central Visayas (Region VII)", state: false },
-    { name: "Eastern Visayas (Region VIII)", state: false },
-    { name: "Zamboanga Peninsula (Region IX)", state: false },
-    { name: "Northern Mindanao (Region X)", state: false },
-    { name: "Davao Region (Region XI)", state: false },
-    { name: "SOCCSKSARGEN (Region XII)", state: false },
-    { name: "Caraga (Region XIII)", state: false },
-    { name: "BARMM (Bangsamoro Autonomous Region in Muslim Mindanao)", state: false },
-    { name: "National Capital Region (NCR)", state: false },
-  ]);
-
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
-  };
-
-  const handleCheckboxChange = (serviceName: string) => {
-    // Update the state of the specific service
-    setServices((prevServices) =>
-      prevServices.map((service) =>
-        service.name === serviceName
-          ? { ...service, state: !service.state }
-          : service
-      )
+  const handleRegionChange = (regionId: string) => {
+    setSelectedRegions(prev =>
+      prev.includes(regionId)
+        ? prev.filter(id => id !== regionId)
+        : [...prev, regionId]
     );
   };
 
-  return (
-    <div
-      className={
-        isOpen
-          ? "relative w-full z-50 rounded-[100px]"
-          : "rounded-none z-50 relative w-full"
-      }
-    >
-      {/* Dropdown Box */}
-      <div
-        className={`border-gray-300 z-50 rounded-sm border  shadow-sm ${
-          isOpen ? "" : ""
-        }`}
-      >
-        {/* Dropdown Button */}
-        <button
-          onClick={toggleDropdown}
-          className="w-full text-left  bg-white px-4 py-2 focus:outline-none flex justify-between focus:ring-2 focus:ring-blue-500  rounded-sm text-sm"
-        >
-          Select Regions <span>{isOpen ? <ChevronUp /> : <ChevronDown />}</span>
-        </button>
-      </div>
+  const handleIslandChange = (islandId: string) => {
+    const regionsInGroup = regionsByGroup[islandId as keyof typeof regionsByGroup];
+    
+    setSelectedIslands(prev => {
+      const newIslands = prev.includes(islandId)
+        ? prev.filter(id => id !== islandId)
+        : [...prev, islandId];
+      
+      setSelectedRegions(prevRegions => {
+        if (prev.includes(islandId)) {
+          // If island was selected, remove its regions
+          return prevRegions.filter(id => !regionsInGroup.includes(id));
+        } else {
+          // If island was not selected, add its regions
+          const existingRegions = prevRegions.filter(id => !regionsInGroup.includes(id));
+          return [...existingRegions, ...regionsInGroup];
+        }
+      });
 
-      {/* Dropdown Menu */}
+      return newIslands;
+    });
+  };
+
+  return (
+    <div className="relative w-full inline-block text-left">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="inline-flex w-full justify-between items-center  px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        Select Region
+        <ChevronDown className="w-4 h-4 ml-2" />
+      </button>
+
       {isOpen && (
-        <div className="absolute rounded-sm mt-2 w-full z-50 bg-white border border-t-0 border-gray-300 pb-2 pt-2 shadow-sm">
-          {services.map((service, index) => (
-            <label
-              key={index}
-              className="flex items-center px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-            >
-              <input
-                type="checkbox"
-                checked={service.state} // Bind checked state
-                onChange={() => handleCheckboxChange(service.name)}
-                className="mr-2 h-4 w-4 text-sm text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              {service.name}
-            </label>
-          ))}
+        <div className="absolute z-10 mt-2 w-full bg-white border border-gray-200 rounded-md shadow-lg">
+          <div className="p-4">
+            <div className="mb-4">
+              <h3 className="text-sm font-gmedium text-blue-600 mb-2">Group of Islands</h3>
+              <div className="space-y-2">
+                {groupOfIslands.map((island) => (
+                  <label key={island.id} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      className="form-checkbox h-4 w-4 text-blue-600 rounded border-gray-300"
+                      checked={selectedIslands.includes(island.id)}
+                      onChange={() => handleIslandChange(island.id)}
+                    />
+                    <span className="ml-2 text-sm text-gray-700">{island.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-gmedium text-blue-600 mb-2">Region</h3>
+              <div className="grid grid-cols-3 gap-2">
+                {regions.map((region) => (
+                  <label key={region.id} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      className="form-checkbox h-4 w-4 text-blue-600 rounded border-gray-300"
+                      checked={selectedRegions.includes(region.id)}
+                      onChange={() => handleRegionChange(region.id)}
+                    />
+                    <span className="ml-2 text-sm text-gray-700">{region.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
   );
 };
 
-export default RegionsDropdown;
+export default RegionSelector;

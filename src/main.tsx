@@ -1,7 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { Navigate, RouterProvider, createBrowserRouter } from "react-router-dom";
-import App from './App.tsx'
 import './index.css'
 import { Suspense, lazy } from "react";
 
@@ -18,18 +17,21 @@ const CentralF= lazy(() =>
   wait(300).then(() => import("./screens/centralOffice/Central.tsx"))
 );
 
+const App= lazy(() =>
+  wait(300).then(() => import("./App.tsx"))
+);
 const router = createBrowserRouter([
   {
     path: "/dmt/",
-    element: <UtiStatus />,
+    element: <App/>,
     
     children: [
       {
         path: "/dmt/", 
-        element: <Navigate to="/dmt/dashboard" />, 
+        element: <Navigate to="/dmt/reports" />, 
       },
       {
-        path: "/dmt/dashboard",
+        path: "/dmt/reports",
         element: <>
         <Suspense fallback={<Loader />}>
           <CentralF/>
@@ -37,7 +39,7 @@ const router = createBrowserRouter([
       </>,
       },
       {
-        path: "/dmt/page2",
+        path: "/dmt/utilization",
         element: <>
         <Suspense fallback={<Loader />}>
           <UtiStatus />
