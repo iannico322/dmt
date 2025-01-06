@@ -7,6 +7,9 @@ import plotly.graph_objects as go
 uploaded_file = st.file_uploader("Upload your CSV file", type="csv")
 if uploaded_file:
     data = pd.read_csv(uploaded_file)
+
+
+    
     
     # Convert 'date' column to datetime
     data['date'] = pd.to_datetime(data['date'], format='%Y-%m')
