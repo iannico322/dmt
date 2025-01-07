@@ -100,7 +100,7 @@ const RegionSelector = () => {
           <div className="p-4">
             <div className="mb-4">
               <h3 className="text-sm font-gmedium text-blue-600 mb-2">Group of Islands</h3>
-              <div className="space-y-2">
+              <div className=" flex gap-5">
                 {groupOfIslands.map((island) => (
                   <label key={island.id} className="flex items-center">
                     <input

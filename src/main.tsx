@@ -16,6 +16,10 @@ const UtiStatus = lazy(() =>
   wait(300).then(() => import('./screens/centralOffice/utistatus/UtiStatus.tsx'))
 );
 
+
+const LGU = lazy(() =>
+  wait(300).then(() => import('./screens/centralOffice/lgu/Lgu.tsx'))
+);
 const CentralF = lazy(() =>
   wait(300).then(() => import('./screens/centralOffice/Central.tsx'))
 );
@@ -47,6 +51,16 @@ const router = createBrowserRouter([
           <>
             <Suspense fallback={<Loader />}>
               <UtiStatus />
+            </Suspense>
+          </>
+        ),
+      },
+      {
+        path: '/dmt/lgu',
+        element: (
+          <>
+            <Suspense fallback={<Loader />}>
+              <LGU />
             </Suspense>
           </>
         ),

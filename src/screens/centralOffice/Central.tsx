@@ -1,22 +1,16 @@
-import React, { useCallback, useMemo, useState, useRef, memo, useEffect } from 'react';
+import  { useCallback, useMemo, useState, useRef, memo, } from 'react';
 import { animated, useSpring } from 'react-spring';
 import { useGesture } from 'react-use-gesture';
 import debounce from 'lodash/debounce';
-import LGUServicesDropdown from './testing/ServicesList';
-import DataPresentationOptions from './testing/DataPresentationOptions';
+
 import PhMap from './map/phMap';
-import viteLogo from "/DICT.png";
-import { Link } from 'react-router-dom';
-import { Chart } from './testing/Chart';
-import SelectDropdown from './testing/Dropdown';
-import RegionsDropdown from './testing/RegionList';
+
 import ChartsDashboard from './testing/Charts';
-import { Calendar } from "@/components/ui/calendar";
+
 import DatePicker from './testing/DatePicker';
 import RegionSelector from './testing/RegionList';
 
-const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const years = ['2024', '2023', '2022', '2021'];
+
 const INITIAL_RESULT = {
     id: "PH",
     operational: 0,
@@ -26,9 +20,7 @@ const INITIAL_RESULT = {
 };
 
 function Central() {
-  const [selectedYear, setSelectedYear] = useState('');
-  const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const [selectedPresentation, setSelectedPresentation] = useState('Bar Graph');
+
   const [result, setResult] = useState(INITIAL_RESULT);
   const [data, setData] = useState<any[]>([]);
   const [clickedRegion, setClickedRegion] = useState<string | null>(null);

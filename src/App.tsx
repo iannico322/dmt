@@ -25,7 +25,7 @@ function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <div className="min-h-screen w-full flex">
-        <nav className="fixed top-0 left-0 w-[20vw] h-screen bg-[#0136a8] z-[99999] flex flex-col items-start p-5">
+        <nav className="fixed top-0 left-0 w-[20vw] md:hidden h-screen bg-[#0136a8] z-[99999] flex flex-col items-start p-5">
           <Link className="flex w-full mr-5 gap-2 " to="/dmt/">
             <img src={viteLogo} className="logo h-20 object-contain self-center" alt="DICT logo" />
           </Link>
@@ -37,8 +37,8 @@ function App() {
           <DataPresentationOptions/>
         </nav>
 
-        <div className="flex-1 ml-[20vw]">
-          <header className="sticky top-0 z-50 bg-white/20 backdrop-blur-md h-[100px] w-full px-20 flex items-center justify-between text-[#6B6B6B]">
+        <div className="flex-1 ml-[20vw] md:ml-0">
+          <header className="sticky top-0 z-50 md:hidden bg-white/20 backdrop-blur-md h-[100px] w-full px-20 flex items-center justify-between text-[#6B6B6B]">
             <ul className="flex gap-10">
               {menuItems.map((item) => (
                 <li
@@ -63,7 +63,7 @@ function App() {
             
           </header>
 
-          <main className="min-h-[calc(100vh-100px)] w-full">
+          <main className=" w-full">
             <Outlet />
           </main>
         </div>
