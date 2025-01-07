@@ -58,7 +58,7 @@ function App() {
             <div className="flex gap-2 items-center">
 
               <img className=" rounded-full w-10 h-10" src={Profile} alt="" />
-            <div className="font-gsemibold">  Welcome, asa (Omair)</div>
+            <div className="font-gsemibold">  Welcome, (Nico Gwapo)</div>
             </div>
             
           </header>

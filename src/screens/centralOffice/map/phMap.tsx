@@ -1,6 +1,9 @@
 import { animated } from "react-spring";
 import phRegions from "./phRegions.json";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useSelector, useDispatch } from 'react-redux';
+import { addRegion, setRegions, logout, selectRegions } from './../../../redux/regionSlice';
+import { AppDispatch } from './../../../redux/store';
 
 const MONTHS = [
   "All Months", "January", "February", "March", "April", "May", "June",
@@ -105,6 +108,14 @@ function PhMap({
     return totals;
   };
 
+  const regions = useSelector(selectRegions);
+  const dispatch: AppDispatch = useDispatch();
+
+  useEffect(()=>{
+    console.log(regions,"asdad")
+    setClickedRegion(regions);
+  },[regions])
+
   const handleRegionClick = (region: Region): void => {
     const currentClickedRegions = clickedRegion ?? [];  // Use nullish coalescing
     let newClickedRegions: string[];
@@ -117,11 +128,12 @@ function PhMap({
 
     const newSelectedRegions = newClickedRegions.map(id => {
       const regionInfo = phRegions.find(r => r.id === id);
-      return `${regionInfo?.name}\n(${id})`;
+      return id;
     });
 
-    setClickedRegion(newClickedRegions);
+    
     setSelectedRegion(newSelectedRegions);
+    dispatch(setRegions(newSelectedRegions));
 
     const selectedRegionsData = data.filter(x => 
       newClickedRegions.includes(x.region)
@@ -152,7 +164,9 @@ function PhMap({
             }
             onMouseEnter={() => setHoveredRegion(region.id)}
             onMouseLeave={() => setHoveredRegion(null)}
-            onClick={() => handleRegionClick(region)}
+            onClick={() => {
+            
+              handleRegionClick(region)}}
             className="cursor-pointer"
           >
             <title>{region.id}</title>
@@ -166,7 +180,8 @@ function PhMap({
             pointerEvents="none"
             dominantBaseline="middle"
           >
-            {region.id}
+            {['NIR', 'BARMM', 'NCR', 'CAR'].includes(region.id) ? region.id : 'Region-' + region.id
+  }
           </text>
         </g>
       ))}

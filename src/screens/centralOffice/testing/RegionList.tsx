@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-
+import { useSelector, useDispatch } from 'react-redux';
+import { setRegions,selectRegions } from './../../../redux/regionSlice';
+import { AppDispatch } from './../../../redux/store';
 const groupOfIslands = [
   { id: 'luzon', name: 'Luzon' },
   { id: 'visayas', name: 'Visayas' },
@@ -12,6 +14,9 @@ const regions = [
   { id: 'II', name: 'II' },
   { id: 'III', name: 'III' },
   { id: 'IV-A', name: 'IV-A' },
+  { id: 'IV-B', name: 'IV-B' },
+
+  
   { id: 'V', name: 'V' },
   { id: 'CAR', name: 'CAR' },
   { id: 'NCR', name: 'NCR' },
@@ -24,19 +29,24 @@ const regions = [
   { id: 'XII', name: 'XII' },
   { id: 'XIII', name: 'XIII' },
   { id: 'BARMM', name: 'BARMM' },
-  { id: 'NIR', name: 'NIR' }
 ];
 
 const regionsByGroup = {
-  luzon: ['I', 'II', 'III', 'IV-A', 'V', 'CAR', 'NCR'],
+  luzon: ['I', 'II', 'III', 'IV-A', 'V', 'CAR', 'NCR','IV-B'],
   visayas: ['VI', 'VII', 'VIII', 'NIR'],
   mindanao: ['IX', 'X', 'XI', 'XII', 'XIII', 'BARMM']
 };
 
-const RegionSelector = () => {
+const RegionSelector = () => { 
+  const regionss = useSelector(selectRegions);
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
+  const [selectedRegions, setSelectedRegions] = useState<string[]>(regionss);
   const [selectedIslands, setSelectedIslands] = useState<string[]>([]);
+
+
+ 
+  const dispatch: AppDispatch = useDispatch();
+
 
   const handleRegionChange = (regionId: string) => {
     setSelectedRegions(prev =>
@@ -45,6 +55,8 @@ const RegionSelector = () => {
         : [...prev, regionId]
     );
   };
+
+
 
   const handleIslandChange = (islandId: string) => {
     const regionsInGroup = regionsByGroup[islandId as keyof typeof regionsByGroup];
@@ -64,10 +76,14 @@ const RegionSelector = () => {
           return [...existingRegions, ...regionsInGroup];
         }
       });
-
+      
       return newIslands;
     });
   };
+
+  useEffect(()=>{
+    dispatch(setRegions(selectedRegions));
+  },[selectedRegions])
 
   return (
     <div className="relative w-full inline-block text-left">
@@ -107,7 +123,7 @@ const RegionSelector = () => {
                     <input
                       type="checkbox"
                       className="form-checkbox h-4 w-4 text-blue-600 rounded border-gray-300"
-                      checked={selectedRegions.includes(region.id)}
+                      checked={regionss.includes(region.id)}
                       onChange={() => handleRegionChange(region.id)}
                     />
                     <span className="ml-2 text-sm text-gray-700">{region.name}</span>
