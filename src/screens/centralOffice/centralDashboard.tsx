@@ -94,6 +94,8 @@ const MapComponent: React.FC = () => {
     }, data[0]?.date || '');
   };
 
+  console.log("re-rendered");
+
   const monthToFormattedValue = useCallback((month: string) => {
     const year = new Date().getFullYear();
     const monthIndex = MONTHS.indexOf(month);

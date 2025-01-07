@@ -28,8 +28,8 @@ const DataPresentationOptions = () => {
   },[presentationOptions])
 
   const handleCheckboxChange = (optionName: string) => {
-    setPresentationOptions((prevOptions) =>
-      prevOptions.map((option) =>
+    setPresentationOptions((prevOptions:any) =>
+      prevOptions.map((option:any) =>
         option.name === optionName
           ? { ...option, state: !option.state }
           : option
@@ -46,24 +46,24 @@ const DataPresentationOptions = () => {
       }
     >
       {/* Dropdown Box */}
-      <div className={`border-gray-300 border rounded-none shadow-sm`}>
+      <div className={`border-gray-300 outline-none mt-2 border-x-0 border-y-2 rounded-none`}>
         {/* Dropdown Button */}
         <button
           onClick={toggleDropdown}
-          className="w-full text-left rounded-none bg-white px-4 py-2 focus:outline-none flex justify-between focus:ring-2 focus:ring-blue-500 font-gsemibold"
+          className="w-full text-left rounded-none text-white px-4 py-2 focus:outline-none flex justify-between  font-gsemibold"
         >
           Data Presentation{" "}
-          <span>{isOpen ? <ChevronUp /> : <ChevronDown />}</span>
+          <span>{isOpen ? <ChevronUp className=" rotate-90"  /> : <ChevronDown />}</span>
         </button>
       </div>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute w-full bg-white border border-t-0 border-gray-300 pb-2 pt-2 shadow-sm">
-          {presentationOptions.map((option, index) => (
+        <div className="absolute w-full text-white  border-gray-300 pb-2 pt-2 ">
+          {presentationOptions.map((option:any, index:any) => (
             <label
               key={index}
-              className="flex items-center px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+              className="flex items-center px-4 py-2 text-sm  cursor-pointer"
             >
               <input
                 type="checkbox"

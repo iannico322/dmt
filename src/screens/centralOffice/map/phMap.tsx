@@ -2,108 +2,171 @@ import { animated } from "react-spring";
 import phRegions from "./phRegions.json";
 import { useCallback, useState } from "react";
 
-
-// Constants outside component
 const MONTHS = [
   "All Months", "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
-function PhMap({selectedMonth,data, setResult, setSelectedRegion, springProps,clickedRegion,setClickedRegion}: any) {
+
+type Region = {
+  id: string;
+  name: string;
+  x: number;
+  y: number;
+  d: string;
+};
+
+type DataItem = {
+  date: string;
+  region: string;
+  operational: string;
+  development: string;
+  trainingOrOthers: string;
+  withdraw: string;
+};
+
+type Totals = {
+  id: string;
+  operational: number;
+  development: number;
+  trainingOrOthers: number;
+  withdraw: number;
+};
+
+interface PhMapProps {
+  selectedMonth: string;
+  data: DataItem[];
+  setResult: (result: Totals) => void;
+  setSelectedRegion: (regions: string[]) => void;
+  springProps: any;
+  clickedRegion: string[] | null | undefined;  // Allow null/undefined
+  setClickedRegion: (regions: string[]) => void;
+}
+function PhMap({
+  selectedMonth,
+  data,
+  setResult,
+  setSelectedRegion,
+  springProps,
+  clickedRegion = [],  // Provide default empty array
+  setClickedRegion
+}: PhMapProps) {
   const [hoveredRegion, setHoveredRegion] = useState<string | null>(null);
-// New state for clicked region
 
-
-  const getLatestMonth = (data: any[]): string => {
+  const getLatestMonth = (data: DataItem[]): string => {
+    if (!data.length) return '';
     return data.reduce((latest, item) => {
-        const currentDate = new Date(item.date);
-        const latestDate = new Date(latest);
-        return currentDate > latestDate ? item.date : latest;
-    }, data[0]?.date || '');
-}; 
+      const currentDate = new Date(item.date);
+      const latestDate = new Date(latest);
+      return currentDate > latestDate ? item.date : latest;
+    }, data[0].date);
+  };
 
-const monthToFormattedValue = useCallback((month: string) => {
-  const year = new Date().getFullYear();
-  const monthIndex = MONTHS.indexOf(month);
-  if (monthIndex === 0) return 'All Months';
-  return `${year}-${monthIndex}`;
-}, []);
-  const calculateTotals = (data: any[],_date:string) => {
-    // Get the latest month from the data
+  const monthToFormattedValue = useCallback((month: string): string => {
+    const year = new Date().getFullYear();
+    const monthIndex = MONTHS.indexOf(month);
+    if (monthIndex === 0) return 'All Months';
+    return `${year}-${monthIndex}`;
+  }, []);
+
+  const calculateTotals = (data: DataItem[], _date: string): Totals => {
     if (!data || data.length === 0) {
-      return [];
-    }
-
-    // Determine the month to use for filtering
-    let latestMonth: string = getLatestMonth(data);
-    
-    // If a specific month is selected, use that instead of the latest month
-    if (selectedMonth && selectedMonth !== 'All Months') {
-      const formattedMonth = monthToFormattedValue(selectedMonth);
-      latestMonth = formattedMonth;
-    }
-
-    let totals = {
+      return {
         id: "PH",
         operational: 0,
         development: 0,
         trainingOrOthers: 0,
         withdraw: 0,
+      };
+    }
+
+    let latestMonth: string = getLatestMonth(data);
+
+    if (selectedMonth && selectedMonth !== 'All Months') {
+      const formattedMonth = monthToFormattedValue(selectedMonth);
+      latestMonth = formattedMonth;
+    }
+
+    let totals: Totals = {
+      id: "PH",
+      operational: 0,
+      development: 0,
+      trainingOrOthers: 0,
+      withdraw: 0,
     };
 
-    // Filter data for the latest month
-    data.filter((item: any) => item.date === latestMonth)
-        .forEach((item: any) => {
-            totals.operational += parseInt(item.operational);
-            totals.development += parseInt(item.development);
-            totals.trainingOrOthers += parseInt(item.trainingOrOthers);
-            totals.withdraw += parseInt(item.withdraw);
-        });
+    data.filter(item => item.date === latestMonth)
+      .forEach(item => {
+        totals.operational += parseInt(item.operational);
+        totals.development += parseInt(item.development);
+        totals.trainingOrOthers += parseInt(item.trainingOrOthers);
+        totals.withdraw += parseInt(item.withdraw);
+      });
 
     return totals;
-};
+  };
+
+  const handleRegionClick = (region: Region): void => {
+    const currentClickedRegions = clickedRegion ?? [];  // Use nullish coalescing
+    let newClickedRegions: string[];
+
+    if (currentClickedRegions.includes(region.id)) {
+      newClickedRegions = currentClickedRegions.filter(id => id !== region.id);
+    } else {
+      newClickedRegions = [...currentClickedRegions, region.id];
+    }
+
+    const newSelectedRegions = newClickedRegions.map(id => {
+      const regionInfo = phRegions.find(r => r.id === id);
+      return `${regionInfo?.name}\n(${id})`;
+    });
+
+    setClickedRegion(newClickedRegions);
+    setSelectedRegion(newSelectedRegions);
+
+    const selectedRegionsData = data.filter(x => 
+      newClickedRegions.includes(x.region)
+    );
+    setResult(calculateTotals(selectedRegionsData, selectedMonth));
+  };
+
   return (
     <animated.svg
-        className=" animate__animated animate__fadeIn"
+      className="animate__animated animate__fadeIn"
       width="100%"
       height="100%"
       viewBox="200 0 602.39 1109.44"
       style={{ ...springProps, cursor: "grab", touchAction: "none" }}
       xmlns="http://www.w3.org/2000/svg"
     >
-      {phRegions.map((e: any) => (
-        <g key={e.id}>
+      {phRegions.map((region: Region) => (
+        <g key={region.id}>
           <path
-            id={e.id}
-            d={e.d}
+            id={region.id}
+            d={region.d}
             fill={
-              clickedRegion === e.id
-                ? "#1e40af" // Color when the region is clicked
-                : hoveredRegion === e.id
-                ? "#1e40af" // Color when the region is hovered
-                : "#323232" // Default color
+              (clickedRegion ?? []).includes(region.id)  // Use nullish coalescing
+                ? "#1e40af"
+                : hoveredRegion === region.id
+                ? "#c52731"
+                : "#323233"
             }
-            onMouseEnter={() => setHoveredRegion(e.id)}
+            onMouseEnter={() => setHoveredRegion(region.id)}
             onMouseLeave={() => setHoveredRegion(null)}
-            onClick={() => {
-              setClickedRegion(e.id); // Set the clicked region
-              setSelectedRegion(`${e.name} \n (${e.id})`);
-              let out: any = data.filter((x: any) => x.region === e.id );
-              setResult( calculateTotals( out,selectedMonth));
-            }}
+            onClick={() => handleRegionClick(region)}
             className="cursor-pointer"
           >
-            <title >{e.id}</title>
+            <title>{region.id}</title>
           </path>
           <text
-            x={e.x} // X-coordinate based on center
-            y={e.y} // Y-coordinate based on center
+            x={region.x}
+            y={region.y}
             fontSize="8"
             fill="#e7be16"
             textAnchor="middle"
             pointerEvents="none"
             dominantBaseline="middle"
           >
-            {e.id}
+            {region.id}
           </text>
         </g>
       ))}
