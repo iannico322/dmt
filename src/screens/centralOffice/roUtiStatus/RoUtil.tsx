@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import DatePicker from '../testing/DatePicker';
 import RegionSelector from '../testing/RegionList';
-import BarChart from './BarChart';
-import TableStatus from './TableStatus';
-import LineCharts from './LineCharts';
+import BarChart from '../roUtiStatus/BarChart';
+import TableStatus from '../roUtiStatus/TableStatus';
+import LineCharts from '../roUtiStatus/LineCharts';
 
-export const UtiStatus = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
+const RoUtil = () => {
+    const [selectedDate, setSelectedDate] = useState(new Date());
 
-  return (
-    <div className='min-h-[100vh] w-full z-10 flex flex-col items-center'>
+    return (
+        <div className='min-h-[100vh] w-full z-10 flex flex-col items-center'>
       <div className='w-[90%] flex flex-col gap-10 min-h-[10px]'>
         <div className='w-ful items-center z-[4] justify-between px-5 flex min-h-[100px] bg-[#ebeff5] border rounded-sm md:flex-col md:py-2 md:gap-3'>
           <div className='flex gap-2 w-[500px] md:w-full'>
@@ -36,7 +36,7 @@ export const UtiStatus = () => {
         </div>
       </div>
     </div>
-  );
-};
+    );
+}
 
-export default UtiStatus;
+export default RoUtil;
