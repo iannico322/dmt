@@ -87,7 +87,7 @@ const LGU: React.FC = () => {
   function GetLGUs() {
     axios.get('13MnnJ7ozNftvHy53dsBKGO7s1iOyfCALYMyP1s4CaF4/values/PSGC 22-3Q', {
       headers: {
-        Authorization: `Token b22ac5a9da3ddc5088984eb00e3b122cd2f6d057fcc84cb6ff81daaabd151fff`,
+        Authorization: `Token ${import.meta.env.VITE_TOKEN}`,
       },
     }).then((response) => {
       const rawData = response.data.values.slice(2);
