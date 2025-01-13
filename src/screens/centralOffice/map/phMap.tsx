@@ -2,7 +2,7 @@ import { animated } from "react-spring";
 import phRegions from "./phRegions.json";
 import { useCallback, useEffect, useState } from "react";
 import { useSelector, useDispatch } from 'react-redux';
-import { addRegion, setRegions, logout, selectRegions } from './../../../redux/regionSlice';
+import { setRegions, selectRegions } from './../../../redux/regionSlice';
 import { AppDispatch } from './../../../redux/store';
 
 const MONTHS = [
@@ -112,7 +112,6 @@ function PhMap({
   const dispatch: AppDispatch = useDispatch();
 
   useEffect(()=>{
-    console.log(regions,"asdad")
     setClickedRegion(regions);
   },[regions])
 

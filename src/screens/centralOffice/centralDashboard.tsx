@@ -8,6 +8,7 @@ import { RegionRanking } from "./charts/ranking";
 import RadarChart from "./charts/radaChart";
 import LineChart from "./charts/lineChart";
 import { useSpring, animated } from "react-spring";
+;
 
 // Constants outside component
 const MONTHS = [
@@ -72,6 +73,8 @@ const SelectDropdown = memo(({
 ));
 
 const MapComponent: React.FC = () => {
+
+
   const [result, setResult] = useState(INITIAL_RESULT);
   const [data, setData] = useState<any[]>([]);
   const [clickedRegion, setClickedRegion] = useState<string | null>(null);
@@ -84,6 +87,7 @@ const MapComponent: React.FC = () => {
     requestAnimationFrame(() => {
       setTransform(newTransform);
     });
+    
   }, []);
 
   const getLatestMonth = (data: any[]): string => {

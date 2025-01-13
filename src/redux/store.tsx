@@ -4,6 +4,8 @@ import { persistReducer, persistStore } from 'redux-persist';
 import { combineReducers } from 'redux';
 import regionReducer from './regionSlice';
 import chartReducer from './chartSlice';
+import projectReducer from './projectSlice';
+
 
 
 
@@ -15,6 +17,7 @@ const persistConfig = {
 const rootReducer = combineReducers({
   region: regionReducer,
   charts:chartReducer,
+  project:projectReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
